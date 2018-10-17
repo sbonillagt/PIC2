@@ -34,62 +34,51 @@ Line    Address Opcode  Instruction
 0030    0014    3001    	MOVLW b'00000001'
 0031    0015    0221    	SUBWF Contador,W
 0032    0016    1903    	BTFSC STATUS, Z
-0033    0017    2829    	GOTO  MOSTRAR1
+0033    0017    2824    	GOTO  MOSTRAR1
 0034    0018            
 0035    0018    3002    	MOVLW b'00000010'
 0036    0019    0221    	SUBWF Contador,W
 0037    001A    1903    	BTFSC STATUS, Z
-0038    001B    282C    	GOTO  MOSTRAR2
+0038    001B    2827    	GOTO  MOSTRAR2
 0039    001C            
 0040    001C    3003    	MOVLW b'00000011'
 0041    001D    0221    	SUBWF Contador,W
 0042    001E    1903    	BTFSC STATUS, Z
-0043    001F    282F    	GOTO  MOSTRAR3
+0043    001F    282A    	GOTO  MOSTRAR3
 0044    0020            
 0045    0020    3004    	MOVLW b'00000100'
 0046    0021    0221    	SUBWF Contador, 0
 0047    0022    1903    	BTFSC STATUS, Z
-0048    0023    2832    	GOTO  MOSTRAR4
+0048    0023    282D    	GOTO  MOSTRAR4
 0049    0024            
-0050    0024    3001    	MOVLW b'00000001'
-0051    0025    0221    	SUBWF Contador,W
-0052    0026    1903    	BTFSC STATUS, Z
-0053    0027    280B    	GOTO  LEERC
-0054    0028            
-0055    0028    2835    	GOTO  MOSTRAR5
-0056    0029            MOSTRAR1
-0057    0029            ;Al iniciar, mostrar cuánto es el índice de luz (escala definida por el grupo)
-0058    0029    3001    	MOVLW B'00000001'
-0059    002A    0088    	MOVWF PORTD
-0060    002B    280B    	GOTO  LEERC
-0061    002C            	;Mostrar el primer inciso
-0062    002C            MOSTRAR2
-0063    002C            ;Al presionar la tecla cambiará y deberá mostrar el número del dispositivo con la mayor
-0064    002C            ;cantidad de luz.
-0065    002C    3002    	MOVLW B'00000010'
-0066    002D    0088    	MOVWF PORTD
-0067    002E    280B    	GOTO  LEERC
-0068    002F            	;Mostrar el segundo inciso
-0069    002F            MOSTRAR3
-0070    002F            ;Al presionar la tecla cambiará y deberá mostrar el número del dispositivo con la menor
-0071    002F            ;cantidad de luz.
-0072    002F    3004    	MOVLW B'00000100'
-0073    0030    0088    	MOVWF PORTD
-0074    0031    280B    	GOTO  LEERC
-0075    0032            	;Mostrar el tercer inciso
-0076    0032            MOSTRAR4
-0077    0032            ;Al presionar la tecla cambiará y mostrará cuál es su número de dispositivo
-0078    0032    3008    	MOVLW B'00001000'
-0079    0033    0088    	MOVWF PORTD
-0080    0034    280B    	GOTO  LEERC
-0081    0035            	;Mostrar el cuarto inciso
-0082    0035            MOSTRAR5
-0083    0035            ;Si se vuelve a presionar la tecla, cambiará al índice de luz
-0084    0035    3010    	MOVLW B'00010000'
-0085    0036    0088    	MOVWF PORTD
-0086    0037            	;Mostrar el quinto inciso
-0087    0037    3000    	MOVLW B'00000000' 
-0088    0038    00A1    	MOVWF Contador ;resetea el contador para empezar de nuevo
-0089    0039    280B    	GOTO  LEERC
+0050    0024            MOSTRAR1
+0051    0024            ;Al iniciar, mostrar cuánto es el índice de luz (escala definida por el grupo)
+0052    0024    3001    	MOVLW B'00000001'
+0053    0025    0088    	MOVWF PORTD
+0054    0026    280B    	GOTO  LEERC
+0055    0027            	;Mostrar el primer inciso
+0056    0027            MOSTRAR2
+0057    0027            ;Al presionar la tecla cambiará y deberá mostrar el número del dispositivo con la mayor
+0058    0027            ;cantidad de luz.
+0059    0027    3002    	MOVLW B'00000010'
+0060    0028    0088    	MOVWF PORTD
+0061    0029    280B    	GOTO  LEERC
+0062    002A            	;Mostrar el segundo inciso
+0063    002A            MOSTRAR3
+0064    002A            ;Al presionar la tecla cambiará y deberá mostrar el número del dispositivo con la menor
+0065    002A            ;cantidad de luz.
+0066    002A    3004    	MOVLW B'00000100'
+0067    002B    0088    	MOVWF PORTD
+0068    002C    280B    	GOTO  LEERC
+0069    002D            	;Mostrar el tercer inciso
+0070    002D            MOSTRAR4
+0071    002D            ;Al presionar la tecla cambiará y mostrará cuál es su número de dispositivo
+0072    002D    3008    	MOVLW B'00001000'
+0073    002E    0088    	MOVWF PORTD
+0074    002F            	;Mostrar el quinto inciso
+0075    002F    3000    	MOVLW B'00000000' 
+0076    0030    00A1    	MOVWF Contador ;resetea el contador para empezar de nuevo
+0077    0031    280B    	GOTO  LEERC
+0078    0032            	;Mostrar el cuarto inciso
 ---------------------------------------------
 Number of errors = 0

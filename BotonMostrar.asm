@@ -47,12 +47,6 @@ CONTAR
 	BTFSC STATUS, Z
 	GOTO  MOSTRAR4
 
-	MOVLW b'00000001'
-	SUBWF Contador,W
-	BTFSC STATUS, Z
-	GOTO  LEERC
-
-	GOTO  MOSTRAR5
 MOSTRAR1
 ;Al iniciar, mostrar cuánto es el índice de luz (escala definida por el grupo)
 	MOVLW B'00000001'
@@ -77,13 +71,8 @@ MOSTRAR4
 ;Al presionar la tecla cambiará y mostrará cuál es su número de dispositivo
 	MOVLW B'00001000'
 	MOVWF PORTD
-	GOTO  LEERC
-	;Mostrar el cuarto inciso
-MOSTRAR5
-;Si se vuelve a presionar la tecla, cambiará al índice de luz
-	MOVLW B'00010000'
-	MOVWF PORTD
 	;Mostrar el quinto inciso
 	MOVLW B'00000000' 
 	MOVWF Contador ;resetea el contador para empezar de nuevo
 	GOTO  LEERC
+	;Mostrar el cuarto inciso
