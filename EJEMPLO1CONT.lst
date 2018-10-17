@@ -1,0 +1,24 @@
+---------------------------------------------
+PIC ASSEMBLER LISTING
+Line    Address Opcode  Instruction
+---------------------------------------------
+0001    0000            ;configuracion 
+0002    0000            ;status 
+0003    0000            	ORG 0x00 ;se elige en que posicion de memoria empezaremos 
+0004    0000    2801    	GOTO START
+0005    0001            ;codigo
+0006    0001            START
+0007    0001    1683    	BSF Status,5 
+0008    0002    0186    	CLRF trisb ;
+0009    0003    1303    	BCF STATUS, PORTB  ;bcf lo pone en 0
+0010    0004    1283    	BCF STATUS, 5
+0011    0005    3000    	MOVLW 0x00 ;se asigna la literal a w (0x00)
+0012    0006    0086    	movwf PORTB ;muevo w a portB 
+0013    0007    2808    	GOTO inc 
+0014    0008            inc 
+0015    0008    3E01    	ADDLW 0x01 ; sume a w la literal (0x01)
+0016    0009    0086    	MOVWF PORTB ; se mueve lo que tiene w a f (portB)
+0017    000A    2808    	GOTO INC 
+0018    000B            END
+---------------------------------------------
+Number of errors = 0
