@@ -1,0 +1,212 @@
+---------------------------------------------
+PIC ASSEMBLER LISTING
+Line    Address Opcode  Instruction
+---------------------------------------------
+0001    0000            ;DECLARACIONES VARIABLES
+0002    0000            DATO EQU 0X21
+0003    0000            stepper	EQU 0X7E
+0004    0000            CounterA EQU 0X24
+0005    0000            CounterB EQU 0X25
+0006    0000            CounterC EQU 0X26
+0007    0000            PasosX EQU 0X27
+0008    0000            PasosRegresoX EQU 0X28
+0009    0000            PasosY EQU 0X29
+0010    0000            PasosRegresoY EQU 0X30
+0011    0000            NumeroIteracionesX EQU 0X31
+0012    0000            
+0013    0000            IrMayorXIteracion EQU 32
+0014    0000            IrMayorPasosY EQU 0X34
+0015    0000            
+0016    0000            INICIO
+0017    0000            ;Inicio del programa ASIGNACIONES VARIABLES
+0018    0000            	ORG	0X00
+0019    0000            
+0020    0000            ;Seteo PUERTO B para los motores
+0021    0000    1683    	BSF	STATUS,	5
+0022    0001    0186    	CLRF	TRISB
+0023    0002    1283    	BCF	STATUS,	5
+0024    0003    3004    	MOVLW	4
+0025    0004    00B1    	MOVWF	NumeroIteracionesX
+0026    0005            
+0027    0005            ;PRUEBA para regresar el motor al mayor de luz  ELIMINAR
+0028    0005    3001    	MOVLW	1 ; Moviendo a w El numero de iteraciones que vaya
+0029    0006    00A0    	MOVWF	IrMayorXIteracion 
+0030    0007    302D    	MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
+0031    0008    00B4    	MOVWF	IrMayorPasosY 
+0032    0009            
+0033    0009    280A    	GOTO	MENU ;mueve el ip al punto de la etiqueta
+0034    000A            
+0035    000A            ;--------------------------MENU PROGRAMA-------------------------------
+0036    000A            MENU 
+0037    000A    200D    	CALL	LOOP_GENERAL
+0038    000B    206C    	CALL	IrMayorLuz;Moverme a Buscar LUz
+0039    000C    2873    	GOTO	SALIR	
+0040    000D            
+0041    000D            LOOP_GENERAL
+0042    000D    3080    	MOVLW	128
+0043    000E    00A7    	MOVWF	PasosX
+0044    000F    00A8    	MOVWF	PasosRegresoX
+0045    0010    2020    	CALL	MOVER_X
+0046    0011    3080    	MOVLW	128
+0047    0012    00A9    	MOVWF	PasosY
+0048    0013    00B0    	MOVWF	PasosRegresoY 
+0049    0014    204B    	CALL	CORRIDAY
+0050    0015    0BB1    	DECFSZ	NumeroIteracionesX, 1
+0051    0016    280D    	GOTO	LOOP_GENERAL
+0052    0017    3004    	MOVLW	4
+0053    0018    00B1    	MOVWF	NumeroIteracionesX
+0054    0019    281A    	GOTO	LOOP_REGRESO_X
+0055    001A            
+0056    001A            LOOP_REGRESO_X
+0057    001A    3080    	MOVLW	128
+0058    001B    00A8    	MOVWF	PasosRegresoX
+0059    001C    203C    	CALL	REGRESOX
+0060    001D    0BB1    	DECFSZ	NumeroIteracionesX, 1
+0061    001E    281A    	GOTO	LOOP_REGRESO_X
+0062    001F            	;GOTO	FIN
+0063    001F    3400    	RETLW	B'00000000'
+0064    0020            
+0065    0020            MOVER_X
+0066    0020    300C    	MOVLW	B'00001100'
+0067    0021    0086    	MOVWF	PORTB
+0068    0022    202F    	CALL	DelayOneSecond
+0069    0023    3006    	MOVLW	B'00000110'
+0070    0024    0086    	MOVWF	PORTB
+0071    0025    202F    	CALL	DelayOneSecond
+0072    0026    3003    	MOVLW	B'00000011'
+0073    0027    0086    	MOVWF	PORTB
+0074    0028    202F    	CALL	DelayOneSecond
+0075    0029    3009    	MOVLW	B'00001001'
+0076    002A    0086    	MOVWF	PORTB
+0077    002B    202F    	CALL	DelayOneSecond
+0078    002C    0BA7    	DECFSZ	PasosX,1
+0079    002D    2820    	GOTO	MOVER_X
+0080    002E    3400    	RETLW	B'00000000'
+0081    002F            
+0082    002F            DelayOneSecond
+0083    002F    3001    	movlw D'1'
+0084    0030    00A6    	movwf CounterC
+0085    0031    3004    	movlw D'4'
+0086    0032    00A5    	movwf CounterB
+0087    0033    3004    	movlw D'4'
+0088    0034    00A4    	movwf CounterA
+0089    0035            
+0090    0035            Loop_Delay
+0091    0035    0BA4    	decfsz CounterA,1
+0092    0036    2835    	goto Loop_Delay
+0093    0037    0BA5    	decfsz CounterB,1
+0094    0038    2835    	goto Loop_Delay
+0095    0039    0BA6    	decfsz CounterC,1
+0096    003A    2835    	goto Loop_Delay
+0097    003B    3400    	RETLW	b'00000000'
+0098    003C            
+0099    003C            REGRESOX
+0100    003C    3009    	MOVLW	B'00001001'
+0101    003D    0086    	MOVWF	PORTB
+0102    003E    202F    	CALL	DelayOneSecond
+0103    003F    3003    	MOVLW	B'00000011'
+0104    0040    0086    	MOVWF	PORTB
+0105    0041    202F    	CALL	DelayOneSecond
+0106    0042    3006    	MOVLW	B'00000110'
+0107    0043    0086    	MOVWF	PORTB
+0108    0044    202F    	CALL	DelayOneSecond
+0109    0045    300C    	MOVLW	B'00001100'
+0110    0046    0086    	MOVWF	PORTB
+0111    0047    202F    	CALL	DelayOneSecond
+0112    0048    0BA8    	DECFSZ	PasosRegresoX,1
+0113    0049    283C    	GOTO	REGRESOX
+0114    004A    3400    	RETLW	B'00000000'
+0115    004B            
+0116    004B            CORRIDAY
+0117    004B    30C0       	MOVLW	B'11000000'
+0118    004C    0086    	MOVWF	PORTB
+0119    004D    202F    	CALL	DelayOneSecond
+0120    004E    3060    	MOVLW	B'01100000'
+0121    004F    0086    	MOVWF	PORTB
+0122    0050    202F    	CALL	DelayOneSecond
+0123    0051    3030    	MOVLW	B'00110000'
+0124    0052    0086    	MOVWF	PORTB
+0125    0053    202F    	CALL	DelayOneSecond
+0126    0054    3090    	MOVLW	B'10010000'
+0127    0055    0086    	MOVWF	PORTB
+0128    0056    202F    	CALL	DelayOneSecond
+0129    0057    0BA9    	DECFSZ	PasosY ,1
+0130    0058    284B    	GOTO	CORRIDAY
+0131    0059    285A    	GOTO	REGRESOY
+0132    005A            
+0133    005A            REGRESOY
+0134    005A    3090        	MOVLW	B'10010000'
+0135    005B    0086    	MOVWF	PORTB
+0136    005C    202F    	CALL	DelayOneSecond
+0137    005D    3030    	MOVLW	B'00110000'
+0138    005E    0086    	MOVWF	PORTB
+0139    005F    202F    	CALL	DelayOneSecond
+0140    0060    3060    	MOVLW	B'01100000'
+0141    0061    0086    	MOVWF	PORTB
+0142    0062    202F    	CALL	DelayOneSecond
+0143    0063    30C0    	MOVLW	B'11000000'
+0144    0064    0086    	MOVWF	PORTB
+0145    0065    202F    	CALL	DelayOneSecond
+0146    0066    0BB0    	DECFSZ	PasosRegresoY ,1
+0147    0067    285A    	GOTO	REGRESOY
+0148    0068    3400    	RETLW	B'00000000'
+0149    0069            
+0150    0069            FIN ; NO se utiliza esta etiqueta se comenta en linea 62 
+0151    0069    3000     	MOVLW	B'00000000'
+0152    006A    0086    	MOVWF	PORTB
+0153    006B    3400    	RETLW	B'00000000'
+0154    006C            	;Call	IrMayorLuz
+0155    006C            
+0156    006C            
+0157    006C            IrMayorLuz
+0158    006C    3080    	MOVLW	128
+0159    006D    00A7    	MOVWF	PasosX
+0160    006E    2074    	CALL	FullMayorX
+0161    006F    0BA0    	DECFSZ	IrMayorXIteracion , 1
+0162    0070    286C    	GOTO	IrMayorLuz
+0163    0071    2083    	CALL	FullMayorY
+0164    0072    3400    	RETLW	B'00000000'
+0165    0073            
+0166    0073            SALIR
+0167    0073            	END
+0168    0073    2873    	GOTO SALIR
+0169    0074            
+0170    0074            FullMayorX
+0171    0074    300C    	MOVLW	B'00001100'
+0172    0075    0086    	MOVWF	PORTB
+0173    0076    202F    	CALL	DelayOneSecond
+0174    0077    3006    	MOVLW	B'00000110'
+0175    0078    0086    	MOVWF	PORTB
+0176    0079    202F    	CALL	DelayOneSecond
+0177    007A    3003    	MOVLW	B'00000011'
+0178    007B    0086    	MOVWF	PORTB
+0179    007C    202F    	CALL	DelayOneSecond
+0180    007D    3009    	MOVLW	B'00001001'
+0181    007E    0086    	MOVWF	PORTB
+0182    007F    202F    	CALL	DelayOneSecond
+0183    0080    0BA7    	DECFSZ	PasosX,1
+0184    0081    2874    	GOTO	FullMayorX
+0185    0082    3400    	RETLW	B'00000000'
+0186    0083            
+0187    0083            FullMayorY
+0188    0083    30C0       	MOVLW	B'11000000'
+0189    0084    0086    	MOVWF	PORTB
+0190    0085    202F    	CALL	DelayOneSecond
+0191    0086    3060    	MOVLW	B'01100000'
+0192    0087    0086    	MOVWF	PORTB
+0193    0088    202F    	CALL	DelayOneSecond
+0194    0089    3030    	MOVLW	B'00110000'
+0195    008A    0086    	MOVWF	PORTB
+0196    008B    202F    	CALL	DelayOneSecond
+0197    008C    3090    	MOVLW	B'10010000'
+0198    008D    0086    	MOVWF	PORTB
+0199    008E    202F    	CALL	DelayOneSecond
+0200    008F    0BB4    	DECFSZ	IrMayorPasosY ,1
+0201    0090    2883    	GOTO	FullMayorY
+0202    0091    3400    	RETLW	B'00000000'
+0203    0092            
+0204    0092            
+0205    0092            
+0206    0092            
+---------------------------------------------
+Number of errors = 0
