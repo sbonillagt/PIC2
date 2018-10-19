@@ -1,28 +1,61 @@
 ;DECLARACIONES VARIABLES
-DATO EQU 0X21
-stepper	EQU 0X7E
-CounterA EQU 0X24
-CounterB EQU 0X25
-CounterC EQU 0X26
-PasosX EQU 0X27
-PasosRegresoX EQU 0X28
-PasosY EQU 0X29
-PasosRegresoY EQU 0X30
-NumeroIteracionesX EQU 0X31
+;DATO EQU 0X21
+;stepper	EQU 0X7E
+;------------------------------ VARIABLES MOTORES INICIO --------------------------------------
+CounterA EQU 0X21
+CounterB EQU 0X22
+CounterC EQU 0X23
 
-IrMayorXIteracion EQU 32
-IrMayorPasosY EQU 0X34
+PasosX EQU 0X24                     ;Pasos que dara el motor por iteracion
+PasosRegresoX EQU 0X25              ;Pasos que hara en el regreso para llegar posicion inical
+PasosY EQU 0X26                     ;Pasos en Y para formar 0 a 90 grados
+PasosRegresoY EQU 0X27              ;Pasos Regreso en Y de 90 a 0
+NumeroIteracionesX EQU 0X28         ;Numero de veces que va hacer la iteracion de 90 (90*4 = 360)
+
+IrMayorXIteracion EQU 0X29          ;Guardar posicion de la iteracion en X donde encuentre mayor luz
+IrMayorPasosY EQU 0X2A              ;Guardar posicion (pasos) en Y donde encuentre mas luz
+
+;------------------------------ VARIABLES BOTON MOSTRAR INICIO --------------------------------------
+ContadorBTN EQU 0X2B
+DatoEnE  EQU 0X2C
+NumGrupo  EQU 0X2D
+
 
 INICIO
 ;Inicio del programa ASIGNACIONES VARIABLES
 	ORG	0X00
 
-;Seteo PUERTO B para los motores
-	BSF	STATUS,	5
-	CLRF	TRISB
-	BCF	STATUS,	5
+;------------------------CONFIGURACIONES PUERTOS --------------------------------------
+;------------------------------ PUERTO A y E --------------------------------------
+	MOVLW b'00000000'
+	MOVWF ContadorBTN
+
+	BSF     STATUS,RP0
+    	BCF     STATUS,RP1
+    	MOVLW   D'14'
+    	MOVWF   ADCON1
+	MOVLW	B'111'
+    	MOVWF   TRISE
+    	BCF     STATUS,RP0
+    	BCF     STATUS,RP1
+
+    	MOVLW   D'7'
+    	MOVWF   NumGrupo
+;------------------------------ PUERTO B --------------------------------------
+	BSF STATUS, 5 ;PONE 1 EN STATUS BIT 5 PARA MOVERNOS AL BANCO 1
+	CLRF TRISB; PONE EN 0 TRIS B Y LA BANDERA Z PONE SALIDA B 
+	CLRW; LIMPIAR W 
+	BCF STATUS, 5; PONE UN 0 EN BIT 5 Y NOS MOVEMOS AL BANCO 0 
 	MOVLW	4
 	MOVWF	NumeroIteracionesX
+;------------------------------ PUERTO D --------------------------------------
+
+
+
+
+
+
+
 
 ;PRUEBA para regresar el motor al mayor de luz  ELIMINAR
 	MOVLW	1 ; Moviendo a w El numero de iteraciones que vaya
@@ -34,10 +67,13 @@ INICIO
 
 ;--------------------------MENU PROGRAMA-------------------------------
 MENU 
-	CALL	LOOP_GENERAL
-	CALL	IrMayorLuz;Moverme a Buscar LUz
+	;CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
+	;CALL	IrMayorLuz;Moverme a Buscar LUz
+	GOTO	LEER_E_BTN
 	GOTO	SALIR	
 
+
+;------------------------------ MOTORES INICIO --------------------------------------
 LOOP_GENERAL
 	MOVLW	128
 	MOVWF	PasosX
@@ -201,6 +237,85 @@ FullMayorY
 	GOTO	FullMayorY
 	RETLW	B'00000000'
 
+;------------------------------ BOTON E 0 INICIAL -----------------------------------------
+LEER_E_BTN
+	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
+	MOVWF DatoEnE ;Movemos la variable hacia dato en E
+	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
+	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
+	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+	GOTO  CONTAR ; SI LA OPERACION ES 0 SE VA A UN CONTAR
+	GOTO  LEER_E_BTN ;REGRESA LOOP LEER
 
+CONTAR
+	INCF  ContadorBTN, 0 ;incrementa e ContadorBTN en 1
+	MOVWF ContadorBTN
+	MOVLW b'00000001'
+	SUBWF ContadorBTN,W
+	BTFSC STATUS, Z
+	GOTO  MOSTRAR1
 
+	MOVLW b'00000010'
+	SUBWF ContadorBTN,W
+	BTFSC STATUS, Z
+	GOTO  MOSTRAR2
 
+	MOVLW b'00000011'
+	SUBWF ContadorBTN,W
+	BTFSC STATUS, Z
+	GOTO  MOSTRAR3
+
+	MOVLW b'00000100'
+	SUBWF ContadorBTN, 0
+	BTFSC STATUS, Z
+	GOTO  MOSTRAR4
+
+MOSTRAR1
+;Al iniciar, mostrar cu�nto es el �ndice de luz (escala definida por el grupo)
+	MOVLW B'00000001'
+	MOVWF PORTB
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	GOTO  LEER_E_BTN
+	;Mostrar el primer inciso
+MOSTRAR2
+;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la mayor
+;cantidad de luz.
+	MOVLW B'00000010'
+	MOVWF PORTB
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	GOTO  LEER_E_BTN
+	;Mostrar el segundo inciso
+MOSTRAR3
+;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la menor
+;cantidad de luz.
+	MOVLW B'00000100'
+	MOVWF PORTB
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	GOTO  LEER_E_BTN
+	;Mostrar el tercer inciso
+MOSTRAR4
+;Al presionar la tecla cambiar� y mostrar� cu�l es su n�mero de dispositivo
+	MOVLW B'00001000'
+	MOVWF PORTB
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	;Mostrar el quinto inciso
+	MOVLW B'00000000' 
+	MOVWF ContadorBTN ;resetea el ContadorBTN para empezar de nuevo
+	GOTO  LEER_E_BTN
+	;Mostrar el cuarto inciso
