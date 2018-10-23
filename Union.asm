@@ -31,7 +31,10 @@ CON3 EQU 0X32
 MAYOR_LUZR EQU 0x33
 MENOR_LUZR EQU 0x34
 CATEGORIA EQU 0X35
-
+;------------------------------Comparacion Variables---------
+Mayor_Encontrado EQU 0x36
+Menor_Encontrado EQU 0x37
+ENTRADA_Comp	EQU 0X38
 
 INICIO
 ;Inicio del programa ASIGNACIONES VARIABLES
@@ -97,10 +100,10 @@ INICIO
 
 
 ;PRUEBA para regresar el motor al mayor de luz  ELIMINAR
-	MOVLW	1 ; Moviendo a w El numero de iteraciones que vaya
-	MOVWF	IrMayorXIteracion 
-	MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
-	MOVWF	IrMayorPasosY 
+	;MOVLW	1 ; Moviendo a w El numero de iteraciones que vaya
+	;MOVWF	IrMayorXIteracion 
+	;MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
+	;MOVWF	IrMayorPasosY 
 
 	GOTO	MENU ;mueve el ip al punto de la etiqueta
 
@@ -108,8 +111,8 @@ INICIO
 MENU 
 	;CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
 	;CALL	IrMayorLuz;Moverme a Buscar LUz
-	GOTO	LEER_E_BTN
-	;GOTO FotoResistencia
+	;GOTO	LEER_E_BTN
+	;GOTO FotoResistencia ;SOlo prueba de foto Resistencia
 	GOTO	SALIR	
 
 
@@ -190,7 +193,7 @@ REGRESOX
 	RETLW	B'00000000'
 
 CORRIDAY
-   	MOVLW	B'11000000'
+	CALL BuscarYMarcarFoto ;<---*-*-*-*-*-*-*-*-*-*-*-*Utlima Linea 23/10/2018 12:31 PM
 	MOVWF	PORTB
 	CALL	DelayOneSecond
 	MOVLW	B'01100000'
@@ -487,6 +490,13 @@ FotoResistencia
 	CALL  COMP_DISPLAY
 	GOTO FotoResistencia
 
+BuscarYMarcarFoto
+	Call _bucle
+	MovF categoria,W
+	MOVWF ENTRADA_Comp
+	Call Comparacion_nums
+	RETURN
+
 _bucle
 	;btfss INTCON,T0IF
 	;goto _bucle ;Esperar que el timer0 desborde
@@ -620,13 +630,47 @@ COMPARACION_Foto
 EntradaMayor
 	MOVF	CATEGORIA,W
 	MOVWF	MAYOR_LUZR
-	MOVLW	B'00000001'
-	MOVWF	PORTD
+	;MOVLW	B'00000001'
+	;MOVWF	PORTD
 	RETURN
 
 EntradaMenor
 	MOVF	CATEGORIA,W
 	MOVWF	MENOR_LUZR
-	MOVLW	B'00000010'
-	MOVWF	PORTD
+	;MOVLW	B'00000010'
+	;MOVWF	PORTD
+	RETURN
+;--------------------------Compracion numeros-------
+Comparacion_nums	
+	MOVF	ENTRADA_Comp,W
+	SUBWF	Menor_Encontrado,W	
+	BTFSC	STATUS,C
+	CALL	EntradaMenor_nums
+
+	MOVF	ENTRADA_Comp,W
+	SUBWF	Mayor_Encontrado,W
+	BTFSS	STATUS,C
+	CALL 	EntradaMayor_nums
+
+	RETURN
+
+EntradaMayor_nums
+	MOVF	ENTRADA_Comp,W
+	MOVWF	Mayor_Encontrado
+	;Moviendo la Iteracion X y Moviento en y
+	MOVF 	NumeroIteracionesX,W
+	MOVWF	IrMayorXIteracion
+
+	MOVF 	PasosY,W
+	MOVWF	IrMayorPasosY
+
+	;MOVLW	B'00000001'
+	;MOVWF	PORTD
+	RETURN
+
+EntradaMenor_nums
+	MOVF	ENTRADA_Comp,W
+	MOVWF	Menor_Encontrado
+	;MOVLW	B'00000010'
+	;MOVWF	PORTD
 	RETURN
