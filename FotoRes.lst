@@ -1,0 +1,190 @@
+---------------------------------------------
+PIC ASSEMBLER LISTING
+Line    Address Opcode  Instruction
+---------------------------------------------
+0001    0000            ADC EQU 0x20
+0002    0000            CON EQU 0X21
+0003    0000            CON2 EQU 0X22
+0004    0000            CON3 EQU 0X23
+0005    0000            MAYOR_LUZR EQU 0x24
+0006    0000            MENOR_LUZR EQU 0x25
+0007    0000            CATEGORIA EQU 0X26
+0008    0000            
+0009    0000            	org 0x00 ;Inicio del programa en la posici?n cero de memoria
+0010    0000    0000    	nop ;Libre (uso del debugger)
+0011    0001            
+0012    0001            _inicio
+0013    0001    1283    	bcf STATUS,RP0 ;Ir banco 0
+0014    0002    1303    	bcf STATUS,RP1
+0015    0003    3041    	movlw b'01000001' ;A/D conversion Fosc/8
+0016    0004    009F    	movwf ADCON0
+0017    0005            	;     	     7     6     5    4    3    2       1 0
+0018    0005            	; 1Fh ADCON0 ADCS1 ADCS0 CHS2 CHS1 CHS0 GO/DONE ? ADON
+0019    0005    1683    	bsf STATUS,RP0 ;Ir banco 1
+0020    0006    1303    	bcf STATUS,RP1
+0021    0007    3007    	movlw b'00000111'
+0022    0008    0081    	movwf OPTION_REG ;TMR0 preescaler, 1:156
+0023    0009            	;                7    6      5    4    3   2   1   0 
+0024    0009            	; 81h OPTION_REG RBPU INTEDG T0CS T0SE PSA PS2 PS1 PS0
+0025    0009    300E    	movlw b'00001110' ;A/D Port AN0/RA0
+0026    000A    009F    	movwf ADCON1
+0027    000B            	;            7    6     5 4 3     2     1     0 
+0028    000B            	; 9Fh ADCON1 ADFM ADCS2 ? ? PCFG3 PCFG2 PCFG1 PCFG0
+0029    000B    1405    	bsf TRISA,0 ;RA0 linea de entrada para el ADC
+0030    000C    0186    	clrf TRISB
+0031    000D    1283    	bcf STATUS,RP0 ;Ir banco 0
+0032    000E    1303    	bcf STATUS,RP1
+0033    000F    0186    	clrf PORTB ;Limpiar PORTB
+0034    0010            
+0035    0010            FotoResistencia
+0036    0010    2014    	CALL _bucle
+0037    0011    0826    	MOVF	CATEGORIA,W
+0038    0012    0086    	MOVWF	PORTB
+0039    0013    2810    	GOTO FotoResistencia
+0040    0014            
+0041    0014            _bucle
+0042    0014            	;btfss INTCON,T0IF
+0043    0014            	;goto _bucle ;Esperar que el timer0 desborde
+0044    0014            	; SE DEBE DE COLOCAR UN DELAY PARA QUE ESPERE LA CONVERSION
+0045    0014    1503    	BSF  STATUS,Z
+0046    0015    2027    	CALL _PRESPERA
+0047    0016    110B    	bcf INTCON,T0IF ;Limpiar el indicador de desborde
+0048    0017    151F    	bsf ADCON0,GO ;Comenzar conversion A/D
+0049    0018            _espera
+0050    0018    191F    	btfsc ADCON0,GO ;ADCON0 es 0? (la conversion esta completa?)
+0051    0019    2818    	goto _espera ;No, ir _espera
+0052    001A    081E    	movf ADRESH,W ;Si, W=ADRESH
+0053    001B            	; 1Eh ADRESH A/D Result Register High Byte
+0054    001B            	; 9Eh ADRESL A/D Result Register Low Byte 
+0055    001B    00A0    	movwf ADC ;ADC=W
+0056    001C            	;rrf ADC,F ;ADC /4
+0057    001C            	;rrf ADC,F
+0058    001C            	;bcf ADC,7
+0059    001C            	;bcf ADC,6
+0060    001C    0820    	movfw ADC ;W = ADC
+0061    001D            	;movwf PORTB ;PORTB = W
+0062    001D    2038    	CALL INTERVALOS
+0063    001E    2068    	CALL COMPARACION
+0064    001F    0008    	RETURN
+0065    0020    3020    	movlw D'32' ;Comparamos el valor del ADC para saber si es menor que 128
+0066    0021    0220    	subwf ADC,W
+0067    0022            	;btfss STATUS,C ;Es mayor a 128?
+0068    0022    2825    	goto _desactivar ;No, desactivar RB7
+0069    0023    1787    	bsf PORTC,7 ;Si, RB7 = 1 logico
+0070    0024    2814    	goto _bucle ;Ir bucle
+0071    0025            _desactivar
+0072    0025    1386    	bcf PORTB,7 ;RB7 = 0 logico
+0073    0026    2814    	goto _bucle ;Ir bucle
+0074    0027            	
+0075    0027            _PRESPERA
+0076    0027    30FF    	MOVLW 0XFF
+0077    0028    00A1    	MOVWF CON
+0078    0029    00A2    	MOVWF CON2
+0079    002A    00A3    	MOVWF CON3	
+0080    002B    202D    	CALL ESPE
+0081    002C    0008    	RETURN	
+0082    002D            
+0083    002D            ESPE
+0084    002D    0BA1    	DECFSZ	CON,0X01
+0085    002E    282D    	GOTO	ESPE
+0086    002F    2031    	CALL	ESPE2
+0087    0030    0008    	RETURN
+0088    0031            ESPE2
+0089    0031    0BA2    	DECFSZ	CON2,0X01
+0090    0032    2831    	GOTO	ESPE2
+0091    0033    2035    	CALL	ESPE3
+0092    0034    0008    	RETURN
+0093    0035            ESPE3
+0094    0035    0BA3    	DECFSZ	CON3,0X01
+0095    0036    2835    	GOTO	ESPE3
+0096    0037    0008    	RETURN
+0097    0038            
+0098    0038            INTERVALOS
+0099    0038    3009    	MOVLW	D'9'
+0100    0039    00A6    	MOVWF	CATEGORIA
+0101    003A            
+0102    003A    30D2    	movlw	d'210'
+0103    003B    0220    	subwf	ADC, 0
+0104    003C    1803    	BTFSc	STATUS, C
+0105    003D    0008    	RETURN
+0106    003E            
+0107    003E    03A6    	DECF	categoria,1
+0108    003F    30C2    	movlw	d'194'
+0109    0040    0220    	subwf	ADC, 0
+0110    0041    1803    	BTFSC STATUS, C
+0111    0042    0008    	return
+0112    0043            
+0113    0043    03A6    	DECF	categoria,1
+0114    0044    30AE    	movlw	d'174'
+0115    0045    0220    	subwf	ADC, 0
+0116    0046    1803    	BTFSC STATUS, C
+0117    0047    0008    	return
+0118    0048            
+0119    0048    03A6    	DECF	categoria,1
+0120    0049    309E    	movlw	d'158'
+0121    004A    0220    	subwf	ADC, 0
+0122    004B    1803    	BTFSC STATUS, C
+0123    004C    0008    	return
+0124    004D            
+0125    004D    03A6    	DECF	categoria,1
+0126    004E    308A    	movlw	d'138'
+0127    004F    0220    	subwf	ADC, 0
+0128    0050    1803    	BTFSC STATUS, C
+0129    0051    0008    	return
+0130    0052            
+0131    0052    03A6    	DECF	categoria,1
+0132    0053    3075    	movlw	d'117'
+0133    0054    0220    	subwf	ADC, 0
+0134    0055    1803    	BTFSC STATUS, C
+0135    0056    0008    	return
+0136    0057            
+0137    0057    03A6    	DECF	categoria,1
+0138    0058    3052    	movlw	d'82'
+0139    0059    0220    	subwf	ADC, 0
+0140    005A    1803    	BTFSC STATUS, C
+0141    005B    0008    	return
+0142    005C            
+0143    005C    03A6    	DECF	categoria,1
+0144    005D    3033    	movlw	d'51'
+0145    005E    0220    	subwf	ADC, 0
+0146    005F    1803    	BTFSC STATUS, C
+0147    0060    0008    	return
+0148    0061            
+0149    0061    03A6    	DECF	categoria,1
+0150    0062    301C    	movlw	d'28'
+0151    0063    0220    	subwf	ADC, 0
+0152    0064    1803    	BTFSC STATUS, C
+0153    0065    0008    	return
+0154    0066            	
+0155    0066    03A6    	DECF	categoria, 1
+0156    0067    0008    	return
+0157    0068            
+0158    0068            COMPARACION	
+0159    0068    0826    	MOVF	CATEGORIA,W
+0160    0069    0225    	SUBWF	MENOR_LUZR,W	
+0161    006A    1803    	BTFSC	STATUS,C
+0162    006B    2076    	CALL	EntradaMenor
+0163    006C            
+0164    006C    0826    	MOVF	CATEGORIA,W
+0165    006D    0224    	SUBWF	MAYOR_LUZR,W
+0166    006E    1C03    	BTFSS	STATUS,C
+0167    006F    2071    	CALL 	EntradaMayor
+0168    0070            
+0169    0070    0008    	RETURN
+0170    0071            
+0171    0071            EntradaMayor
+0172    0071    0826    	MOVF	CATEGORIA,W
+0173    0072    00A4    	MOVWF	MAYOR_LUZR
+0174    0073    3001    	MOVLW	B'00000001'
+0175    0074    0088    	MOVWF	PORTD
+0176    0075    0008    	RETURN
+0177    0076            
+0178    0076            EntradaMenor
+0179    0076    0826    	MOVF	CATEGORIA,W
+0180    0077    00A5    	MOVWF	MENOR_LUZR
+0181    0078    3002    	MOVLW	B'00000010'
+0182    0079    0088    	MOVWF	PORTD
+0183    007A    0008    	RETURN
+0184    007B            end
+---------------------------------------------
+Number of errors = 0

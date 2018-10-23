@@ -23,6 +23,14 @@ NumGrupo  EQU 0X2D
 ;------------------------------ VARIABLES DISPLAY --------------------------------------
 DATO_DISPLAY EQU 0X2E
 
+;------------------------------Variables Foto Resistencia
+ADC EQU 0x2F
+CON EQU 0X30
+CON2 EQU 0X31
+CON3 EQU 0X32
+MAYOR_LUZR EQU 0x33
+MENOR_LUZR EQU 0x34
+CATEGORIA EQU 0X35
 
 
 INICIO
@@ -30,21 +38,42 @@ INICIO
 	ORG	0X00
 
 ;------------------------CONFIGURACIONES PUERTOS --------------------------------------
+;------------------------------ PUERTO A y E JEFF --------------------------------------
+	bcf STATUS,RP0 ;Ir banco 0
+	bcf STATUS,RP1
+	movlw b'01000001' ;A/D conversion Fosc/8
+	movwf ADCON0
+	;     	     7     6     5    4    3    2       1 0
+	; 1Fh ADCON0 ADCS1 ADCS0 CHS2 CHS1 CHS0 GO/DONE ? ADON
+	bsf STATUS,RP0 ;Ir banco 1
+	bcf STATUS,RP1
+	movlw b'00000111'
+	movwf OPTION_REG ;TMR0 preescaler, 1:156
+	;                7    6      5    4    3   2   1   0 
+	; 81h OPTION_REG RBPU INTEDG T0CS T0SE PSA PS2 PS1 PS0
+	movlw b'00001110' ;A/D Port AN0/RA0
+	movwf ADCON1
+	;            7    6     5 4 3     2     1     0 
+	; 9Fh ADCON1 ADFM ADCS2 ? ? PCFG3 PCFG2 PCFG1 PCFG0
+	bsf TRISA,0 ;RA0 linea de entrada para el ADC
+	bcf STATUS,RP0 ;Ir banco 0
+	bcf STATUS,RP1
+
 ;------------------------------ PUERTO A y E --------------------------------------
 	MOVLW b'00000000'
 	MOVWF ContadorBTN
 	MOVWF DATO_DISPLAY
 	
 
-
-	BSF     STATUS,RP0
-    	BCF     STATUS,RP1
-    	MOVLW   D'14'
-    	MOVWF   ADCON1
-	MOVLW	B'111'
-    	MOVWF   TRISE
-    	BCF     STATUS,RP0
-    	BCF     STATUS,RP1
+;----Desactive estas configuraiones para poder ver lo de JEFF
+	;BSF     STATUS,RP0
+    ;BCF     STATUS,RP1
+    ;MOVLW   D'14'
+    ;MOVWF   ADCON1
+	;MOVLW	B'111'
+    ;MOVWF   TRISE
+    ;BCF     STATUS,RP0
+    ;BCF     STATUS,RP1
 
     	MOVLW   D'7'
     	MOVWF   NumGrupo
@@ -80,6 +109,7 @@ MENU
 	;CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
 	;CALL	IrMayorLuz;Moverme a Buscar LUz
 	GOTO	LEER_E_BTN
+	;GOTO FotoResistencia
 	GOTO	SALIR	
 
 
@@ -400,7 +430,7 @@ COMP_DISPLAY
 	GOTO	LEER_E_BTN
 
 MOSTRAR0
-	MOVLW B'00111111' ; EN BINARIO PONEMOS 0 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+	MOVLW B'11000000' ; EN BINARIO PONEMOS 0 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
 	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
 	RETLW	B'00000000'
 
@@ -425,12 +455,12 @@ MOSTRAR4
 	RETLW	B'00000000'
 
 MOSTRAR5
-	MOVLW B'01101101' ; EN BINARIO PONEMOS 5 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+	MOVLW B'10010010' ; EN BINARIO PONEMOS 5 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
 	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
 	RETLW	B'00000000'
 
 MOSTRAR6
-	MOVLW B'01111101' ; EN BINARIO PONEMOS 6 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+	MOVLW B'10000010' ; EN BINARIO PONEMOS 6 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
 	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
 	RETLW	B'00000000'
 
@@ -449,3 +479,154 @@ MOSTRAR9
 	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
 	RETLW	B'00000000'
 
+;------------------------------FOTO RESISTENCIA  -----------------------------------------
+FotoResistencia
+	CALL _bucle
+	MOVF	CATEGORIA,W
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	GOTO FotoResistencia
+
+_bucle
+	;btfss INTCON,T0IF
+	;goto _bucle ;Esperar que el timer0 desborde
+	; SE DEBE DE COLOCAR UN DELAY PARA QUE ESPERE LA CONVERSION
+	BSF  STATUS,Z
+	CALL _PRESPERA
+	bcf INTCON,T0IF ;Limpiar el indicador de desborde
+	bsf ADCON0,GO ;Comenzar conversion A/D
+_espera
+	btfsc ADCON0,GO ;ADCON0 es 0? (la conversion esta completa?)
+	goto _espera ;No, ir _espera
+	movf ADRESH,W ;Si, W=ADRESH
+	; 1Eh ADRESH A/D Result Register High Byte
+	; 9Eh ADRESL A/D Result Register Low Byte 
+	movwf ADC ;ADC=W
+	;rrf ADC,F ;ADC /4
+	;rrf ADC,F
+	;bcf ADC,7
+	;bcf ADC,6
+	movfw ADC ;W = ADC
+	;movwf PORTB ;PORTB = W
+	CALL INTERVALOS
+	CALL COMPARACION_Foto
+	RETURN
+	movlw D'32' ;Comparamos el valor del ADC para saber si es menor que 128
+	subwf ADC,W
+	;btfss STATUS,C ;Es mayor a 128?
+	goto _desactivar ;No, desactivar RB7
+	bsf PORTC,7 ;Si, RB7 = 1 logico
+	goto _bucle ;Ir bucle
+_desactivar
+	bcf PORTB,7 ;RB7 = 0 logico
+	goto _bucle ;Ir bucle
+	
+_PRESPERA
+	MOVLW 0XFF
+	MOVWF CON
+	MOVWF CON2
+	MOVWF CON3	
+	CALL ESPE
+	RETURN	
+
+ESPE
+	DECFSZ	CON,0X01
+	GOTO	ESPE
+	CALL	ESPE2
+	RETURN
+ESPE2
+	DECFSZ	CON2,0X01
+	GOTO	ESPE2
+	CALL	ESPE3
+	RETURN
+ESPE3
+	DECFSZ	CON3,0X01
+	GOTO	ESPE3
+	RETURN
+
+INTERVALOS
+	MOVLW	D'9'
+	MOVWF	CATEGORIA
+
+	movlw	d'210'
+	subwf	ADC, 0
+	BTFSc	STATUS, C
+	RETURN
+
+	DECF	categoria,1
+	movlw	d'194'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+
+	DECF	categoria,1
+	movlw	d'174'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+
+	DECF	categoria,1
+	movlw	d'158'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+
+	DECF	categoria,1
+	movlw	d'138'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+
+	DECF	categoria,1
+	movlw	d'117'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+
+	DECF	categoria,1
+	movlw	d'82'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+
+	DECF	categoria,1
+	movlw	d'51'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+
+	DECF	categoria,1
+	movlw	d'28'
+	subwf	ADC, 0
+	BTFSC STATUS, C
+	return
+	
+	DECF	categoria, 1
+	return
+
+COMPARACION_Foto	
+	MOVF	CATEGORIA,W
+	SUBWF	MENOR_LUZR,W	
+	BTFSC	STATUS,C
+	CALL	EntradaMenor
+
+	MOVF	CATEGORIA,W
+	SUBWF	MAYOR_LUZR,W
+	BTFSS	STATUS,C
+	CALL 	EntradaMayor
+
+	RETURN
+
+EntradaMayor
+	MOVF	CATEGORIA,W
+	MOVWF	MAYOR_LUZR
+	MOVLW	B'00000001'
+	MOVWF	PORTD
+	RETURN
+
+EntradaMenor
+	MOVF	CATEGORIA,W
+	MOVWF	MENOR_LUZR
+	MOVLW	B'00000010'
+	MOVWF	PORTD
+	RETURN

@@ -27,431 +27,612 @@ Line    Address Opcode  Instruction
 0023    0000            ;------------------------------ VARIABLES DISPLAY --------------------------------------
 0024    0000            DATO_DISPLAY EQU 0X2E
 0025    0000            
-0026    0000            
-0027    0000            
-0028    0000            INICIO
-0029    0000            ;Inicio del programa ASIGNACIONES VARIABLES
-0030    0000            	ORG	0X00
-0031    0000            
-0032    0000            ;------------------------CONFIGURACIONES PUERTOS --------------------------------------
-0033    0000            ;------------------------------ PUERTO A y E --------------------------------------
-0034    0000    3000    	MOVLW b'00000000'
-0035    0001    00AB    	MOVWF ContadorBTN
-0036    0002    00AE    	MOVWF DATO_DISPLAY
-0037    0003            	
-0038    0003            
-0039    0003            
-0040    0003    1683    	BSF     STATUS,RP0
-0041    0004    1303        	BCF     STATUS,RP1
-0042    0005    300E        	MOVLW   D'14'
-0043    0006    009F        	MOVWF   ADCON1
-0044    0007    3007    	MOVLW	B'111'
-0045    0008    0089        	MOVWF   TRISE
-0046    0009    1283        	BCF     STATUS,RP0
-0047    000A    1303        	BCF     STATUS,RP1
-0048    000B            
-0049    000B    3007        	MOVLW   D'7'
-0050    000C    00AD        	MOVWF   NumGrupo
-0051    000D            ;------------------------------ PUERTO B --------------------------------------
-0052    000D    1683    	BSF STATUS, 5 ;PONE 1 EN STATUS BIT 5 PARA MOVERNOS AL BANCO 1
-0053    000E    0186    	CLRF TRISB; PONE EN 0 TRIS B Y LA BANDERA Z PONE SALIDA B 
-0054    000F    0187    	CLRF TRISC; HABILITA EL PUERTO C COMO SALIDA
-0055    0010            
-0056    0010    0100    	CLRW; LIMPIAR W 
-0057    0011    1283    	BCF STATUS, 5; PONE UN 0 EN BIT 5 Y NOS MOVEMOS AL BANCO 0 
-0058    0012    3004    	MOVLW	4
-0059    0013    00A8    	MOVWF	NumeroIteracionesX
-0060    0014            ;------------------------------ PUERTO C --------------------------------------
-0061    0014    3000    	MOVLW B'00000000'
-0062    0015    00AE    	MOVWF DATO_DISPLAY
-0063    0016            
-0064    0016            
-0065    0016            
-0066    0016            
-0067    0016            
-0068    0016            
-0069    0016            
-0070    0016            ;PRUEBA para regresar el motor al mayor de luz  ELIMINAR
-0071    0016    3001    	MOVLW	1 ; Moviendo a w El numero de iteraciones que vaya
-0072    0017    00A9    	MOVWF	IrMayorXIteracion 
-0073    0018    302D    	MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
-0074    0019    00AA    	MOVWF	IrMayorPasosY 
-0075    001A            
-0076    001A    281B    	GOTO	MENU ;mueve el ip al punto de la etiqueta
-0077    001B            
-0078    001B            ;--------------------------MENU PROGRAMA-------------------------------
-0079    001B            MENU 
-0080    001B            	;CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
-0081    001B            	;CALL	IrMayorLuz;Moverme a Buscar LUz
-0082    001B    28A2    	GOTO	LEER_E_BTN
-0083    001C    2883    	GOTO	SALIR	
-0084    001D            
-0085    001D            
-0086    001D            ;------------------------------ MOTORES INICIO --------------------------------------
-0087    001D            LOOP_GENERAL
-0088    001D    3080    	MOVLW	128
-0089    001E    00A4    	MOVWF	PasosX
-0090    001F    00A5    	MOVWF	PasosRegresoX
-0091    0020    2030    	CALL	MOVER_X
-0092    0021    3080    	MOVLW	128
-0093    0022    00A6    	MOVWF	PasosY
-0094    0023    00A7    	MOVWF	PasosRegresoY 
-0095    0024    205B    	CALL	CORRIDAY
-0096    0025    0BA8    	DECFSZ	NumeroIteracionesX, 1
-0097    0026    281D    	GOTO	LOOP_GENERAL
-0098    0027    3004    	MOVLW	4
-0099    0028    00A8    	MOVWF	NumeroIteracionesX
-0100    0029    282A    	GOTO	LOOP_REGRESO_X
-0101    002A            
-0102    002A            LOOP_REGRESO_X
-0103    002A    3080    	MOVLW	128
-0104    002B    00A5    	MOVWF	PasosRegresoX
-0105    002C    204C    	CALL	REGRESOX
-0106    002D    0BA8    	DECFSZ	NumeroIteracionesX, 1
-0107    002E    282A    	GOTO	LOOP_REGRESO_X
-0108    002F            	;GOTO	FIN
-0109    002F    3400    	RETLW	B'00000000'
-0110    0030            
-0111    0030            MOVER_X
-0112    0030    300C    	MOVLW	B'00001100'
-0113    0031    0086    	MOVWF	PORTB
-0114    0032    203F    	CALL	DelayOneSecond
-0115    0033    3006    	MOVLW	B'00000110'
-0116    0034    0086    	MOVWF	PORTB
-0117    0035    203F    	CALL	DelayOneSecond
-0118    0036    3003    	MOVLW	B'00000011'
-0119    0037    0086    	MOVWF	PORTB
-0120    0038    203F    	CALL	DelayOneSecond
-0121    0039    3009    	MOVLW	B'00001001'
-0122    003A    0086    	MOVWF	PORTB
-0123    003B    203F    	CALL	DelayOneSecond
-0124    003C    0BA4    	DECFSZ	PasosX,1
-0125    003D    2830    	GOTO	MOVER_X
-0126    003E    3400    	RETLW	B'00000000'
-0127    003F            
-0128    003F            DelayOneSecond
-0129    003F    3001    	movlw D'1'
-0130    0040    00A3    	movwf CounterC
-0131    0041    3004    	movlw D'4'
-0132    0042    00A2    	movwf CounterB
-0133    0043    3004    	movlw D'4'
-0134    0044    00A1    	movwf CounterA
-0135    0045            
-0136    0045            Loop_Delay
-0137    0045    0BA1    	decfsz CounterA,1
-0138    0046    2845    	goto Loop_Delay
-0139    0047    0BA2    	decfsz CounterB,1
-0140    0048    2845    	goto Loop_Delay
-0141    0049    0BA3    	decfsz CounterC,1
-0142    004A    2845    	goto Loop_Delay
-0143    004B    3400    	RETLW	b'00000000'
-0144    004C            
-0145    004C            REGRESOX
-0146    004C    3009    	MOVLW	B'00001001'
-0147    004D    0086    	MOVWF	PORTB
-0148    004E    203F    	CALL	DelayOneSecond
-0149    004F    3003    	MOVLW	B'00000011'
-0150    0050    0086    	MOVWF	PORTB
-0151    0051    203F    	CALL	DelayOneSecond
-0152    0052    3006    	MOVLW	B'00000110'
-0153    0053    0086    	MOVWF	PORTB
-0154    0054    203F    	CALL	DelayOneSecond
-0155    0055    300C    	MOVLW	B'00001100'
-0156    0056    0086    	MOVWF	PORTB
-0157    0057    203F    	CALL	DelayOneSecond
-0158    0058    0BA5    	DECFSZ	PasosRegresoX,1
-0159    0059    284C    	GOTO	REGRESOX
-0160    005A    3400    	RETLW	B'00000000'
-0161    005B            
-0162    005B            CORRIDAY
-0163    005B    30C0       	MOVLW	B'11000000'
-0164    005C    0086    	MOVWF	PORTB
-0165    005D    203F    	CALL	DelayOneSecond
-0166    005E    3060    	MOVLW	B'01100000'
-0167    005F    0086    	MOVWF	PORTB
-0168    0060    203F    	CALL	DelayOneSecond
-0169    0061    3030    	MOVLW	B'00110000'
-0170    0062    0086    	MOVWF	PORTB
-0171    0063    203F    	CALL	DelayOneSecond
-0172    0064    3090    	MOVLW	B'10010000'
-0173    0065    0086    	MOVWF	PORTB
-0174    0066    203F    	CALL	DelayOneSecond
-0175    0067    0BA6    	DECFSZ	PasosY ,1
-0176    0068    285B    	GOTO	CORRIDAY
-0177    0069    286A    	GOTO	REGRESOY
-0178    006A            
-0179    006A            REGRESOY
-0180    006A    3090        	MOVLW	B'10010000'
-0181    006B    0086    	MOVWF	PORTB
-0182    006C    203F    	CALL	DelayOneSecond
-0183    006D    3030    	MOVLW	B'00110000'
-0184    006E    0086    	MOVWF	PORTB
-0185    006F    203F    	CALL	DelayOneSecond
-0186    0070    3060    	MOVLW	B'01100000'
-0187    0071    0086    	MOVWF	PORTB
-0188    0072    203F    	CALL	DelayOneSecond
-0189    0073    30C0    	MOVLW	B'11000000'
-0190    0074    0086    	MOVWF	PORTB
-0191    0075    203F    	CALL	DelayOneSecond
-0192    0076    0BA7    	DECFSZ	PasosRegresoY ,1
-0193    0077    286A    	GOTO	REGRESOY
-0194    0078    3400    	RETLW	B'00000000'
-0195    0079            
-0196    0079            FIN ; NO se utiliza esta etiqueta se comenta en linea 62 
-0197    0079    3000     	MOVLW	B'00000000'
-0198    007A    0086    	MOVWF	PORTB
-0199    007B    3400    	RETLW	B'00000000'
-0200    007C            	;Call	IrMayorLuz
-0201    007C            
-0202    007C            
-0203    007C            IrMayorLuz
-0204    007C    3080    	MOVLW	128
-0205    007D    00A4    	MOVWF	PasosX
-0206    007E    2084    	CALL	FullMayorX
-0207    007F    0BA9    	DECFSZ	IrMayorXIteracion , 1
-0208    0080    287C    	GOTO	IrMayorLuz
-0209    0081    2093    	CALL	FullMayorY
-0210    0082    3400    	RETLW	B'00000000'
-0211    0083            
-0212    0083            SALIR
-0213    0083            	END
-0214    0083    2883    	GOTO SALIR
-0215    0084            
-0216    0084            FullMayorX
-0217    0084    300C    	MOVLW	B'00001100'
-0218    0085    0086    	MOVWF	PORTB
-0219    0086    203F    	CALL	DelayOneSecond
-0220    0087    3006    	MOVLW	B'00000110'
-0221    0088    0086    	MOVWF	PORTB
-0222    0089    203F    	CALL	DelayOneSecond
-0223    008A    3003    	MOVLW	B'00000011'
-0224    008B    0086    	MOVWF	PORTB
-0225    008C    203F    	CALL	DelayOneSecond
-0226    008D    3009    	MOVLW	B'00001001'
-0227    008E    0086    	MOVWF	PORTB
-0228    008F    203F    	CALL	DelayOneSecond
-0229    0090    0BA4    	DECFSZ	PasosX,1
-0230    0091    2884    	GOTO	FullMayorX
-0231    0092    3400    	RETLW	B'00000000'
-0232    0093            
-0233    0093            FullMayorY
-0234    0093    30C0       	MOVLW	B'11000000'
-0235    0094    0086    	MOVWF	PORTB
-0236    0095    203F    	CALL	DelayOneSecond
-0237    0096    3060    	MOVLW	B'01100000'
-0238    0097    0086    	MOVWF	PORTB
-0239    0098    203F    	CALL	DelayOneSecond
-0240    0099    3030    	MOVLW	B'00110000'
-0241    009A    0086    	MOVWF	PORTB
-0242    009B    203F    	CALL	DelayOneSecond
-0243    009C    3090    	MOVLW	B'10010000'
-0244    009D    0086    	MOVWF	PORTB
-0245    009E    203F    	CALL	DelayOneSecond
-0246    009F    0BAA    	DECFSZ	IrMayorPasosY ,1
-0247    00A0    2893    	GOTO	FullMayorY
-0248    00A1    3400    	RETLW	B'00000000'
-0249    00A2            
-0250    00A2            ;------------------------------ BOTON E 0 INICIAL -----------------------------------------
-0251    00A2            LEER_E_BTN
-0252    00A2    0809    	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
-0253    00A3    00AC    	MOVWF DatoEnE ;Movemos la variable hacia dato en E
-0254    00A4    3001    	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
-0255    00A5    022C    	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
-0256    00A6    203F    	CALL	DelayOneSecond
-0257    00A7    203F    	CALL	DelayOneSecond
-0258    00A8    203F    	CALL	DelayOneSecond
-0259    00A9    203F    	CALL	DelayOneSecond
-0260    00AA    203F    	CALL	DelayOneSecond
-0261    00AB    203F    	CALL	DelayOneSecond
-0262    00AC    203F    	CALL	DelayOneSecond
-0263    00AD    203F    	CALL	DelayOneSecond
-0264    00AE    203F    	CALL	DelayOneSecond
-0265    00AF    203F    	CALL	DelayOneSecond
-0266    00B0    203F    	CALL	DelayOneSecond
-0267    00B1    203F    	CALL	DelayOneSecond
-0268    00B2    1903    	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
-0269    00B3    28B5    	GOTO  CONTAR ; SI LA OPERACION ES 0 SE VA A UN CONTAR
-0270    00B4    28A2    	GOTO  LEER_E_BTN ;REGRESA LOOP LEER
-0271    00B5            
-0272    00B5            CONTAR
-0273    00B5    0A2B    	INCF  ContadorBTN, 0 ;incrementa e ContadorBTN en 1
-0274    00B6    00AB    	MOVWF ContadorBTN
-0275    00B7    3001    	MOVLW b'00000001'
-0276    00B8    022B    	SUBWF ContadorBTN,W
-0277    00B9    1903    	BTFSC STATUS, Z
-0278    00BA    28C7    	GOTO  BTN1
-0279    00BB            
-0280    00BB    3002    	MOVLW b'00000010'
-0281    00BC    022B    	SUBWF ContadorBTN,W
-0282    00BD    1903    	BTFSC STATUS, Z
-0283    00BE    28CD    	GOTO  BTN2
-0284    00BF            
-0285    00BF    3003    	MOVLW b'00000011'
-0286    00C0    022B    	SUBWF ContadorBTN,W
-0287    00C1    1903    	BTFSC STATUS, Z
-0288    00C2    28D3    	GOTO  BTN3
-0289    00C3            
-0290    00C3    3004    	MOVLW b'00000100'
-0291    00C4    022B    	SUBWF ContadorBTN, 0
-0292    00C5    1903    	BTFSC STATUS, Z
-0293    00C6    28D9    	GOTO  BTN4
-0294    00C7            
-0295    00C7            BTN1
-0296    00C7            ;Al iniciar, mostrar cu�nto es el �ndice de luz (escala definida por el grupo)
-0297    00C7    3001    	MOVLW B'00000001'
-0298    00C8    0086    	MOVWF PORTB
-0299    00C9            
-0300    00C9    3001    	MOVLW D'1'
-0301    00CA    00AE    	MOVWF DATO_DISPLAY
-0302    00CB    20E1    	CALL  COMP_DISPLAY
-0303    00CC            
-0304    00CC    28A2    	GOTO  LEER_E_BTN
-0305    00CD            	;Mostrar el primer inciso
-0306    00CD            BTN2
-0307    00CD            ;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la mayor
-0308    00CD            ;cantidad de luz.
-0309    00CD    3002    	MOVLW B'00000010'
-0310    00CE    0086    	MOVWF PORTB
-0311    00CF            	
-0312    00CF    3002    	MOVLW D'2'
-0313    00D0    00AE    	MOVWF DATO_DISPLAY
-0314    00D1            
-0315    00D1    20E1    	CALL  COMP_DISPLAY
-0316    00D2            
-0317    00D2    28A2    	GOTO  LEER_E_BTN
-0318    00D3            	;Mostrar el segundo inciso
-0319    00D3            BTN3
-0320    00D3            ;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la menor
-0321    00D3            ;cantidad de luz.
-0322    00D3    3004    	MOVLW B'00000100'
-0323    00D4    0086    	MOVWF PORTB
-0324    00D5            
-0325    00D5    3003    	MOVLW D'3'
-0326    00D6    00AE    	MOVWF DATO_DISPLAY
-0327    00D7    20E1    	CALL  COMP_DISPLAY
-0328    00D8            
-0329    00D8    28A2    	GOTO  LEER_E_BTN
-0330    00D9            	;Mostrar el tercer inciso
-0331    00D9            BTN4       ;Al presionar la tecla cambiar� y mostrar� cu�l es su n�mero de dispositivo
-0332    00D9    3008    	MOVLW B'00001000'
-0333    00DA    0086    	MOVWF PORTB
-0334    00DB            
-0335    00DB    3000    	MOVLW B'00000000' 
-0336    00DC    00AB    	MOVWF ContadorBTN ;resetea el ContadorBTN para empezar de nuevo
-0337    00DD            
-0338    00DD    3004    	MOVLW D'4'
-0339    00DE    00AE    	MOVWF DATO_DISPLAY
-0340    00DF    20E1    	CALL  COMP_DISPLAY
-0341    00E0    28A2    	GOTO  LEER_E_BTN
-0342    00E1            
-0343    00E1            
-0344    00E1            ;------------------------------ DISPLAY  -----------------------------------------
-0345    00E1            
-0346    00E1            COMP_DISPLAY
-0347    00E1            ;COMPARACION BIT POR BIT 
-0348    00E1    3000    	MOVLW	B'00000000' ;LE ENVIAMOS A W EL NUMERO 0 EN BINARIO EN 8 BITS
-0349    00E2    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0350    00E3    1903    	BTFSC	STATUS,Z
-0351    00E4    290C    	GOTO	MOSTRAR0
-0352    00E5            
-0353    00E5    3001    	MOVLW	B'00000001' ;LE ENVIAMOS A W EL NUMERO 1 EN BINARIO EN 8 BITS
-0354    00E6    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0355    00E7    1903    	BTFSC	STATUS,Z
-0356    00E8    290F    	GOTO	MOSTRAR1
-0357    00E9            
-0358    00E9    3002    	MOVLW	B'00000010' ;LE ENVIAMOS A W EL NUMERO 2 EN BINARIO EN 8 BITS
-0359    00EA    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0360    00EB    1903    	BTFSC	STATUS,Z
-0361    00EC    2912    	GOTO	MOSTRAR2
-0362    00ED            	
-0363    00ED    3003    	MOVLW	B'00000011' ;LE ENVIAMOS A W EL NUMERO 3 EN BINARIO EN 8 BITS
-0364    00EE    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0365    00EF    1903    	BTFSC	STATUS,Z
-0366    00F0    2915    	GOTO	MOSTRAR3
-0367    00F1            
-0368    00F1    3004    	MOVLW	B'00000100' ;LE ENVIAMOS A W EL NUMERO 4 EN BINARIO EN 8 BITS
-0369    00F2    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0370    00F3    1903    	BTFSC	STATUS,Z
-0371    00F4    2918    	GOTO	MOSTRAR4
-0372    00F5            
-0373    00F5    3005    	MOVLW	B'00000101' ;LE ENVIAMOS A W EL NUMERO 5 EN BINARIO EN 8 BITS
-0374    00F6    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0375    00F7    1903    	BTFSC	STATUS,Z
-0376    00F8    291B    	GOTO	MOSTRAR5
-0377    00F9            
-0378    00F9    3006    	MOVLW	B'00000110' ;LE ENVIAMOS A W EL NUMERO 6 EN BINARIO EN 8 BITS
-0379    00FA    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0380    00FB    1903    	BTFSC	STATUS,Z
-0381    00FC    291E    	GOTO	MOSTRAR6
-0382    00FD            
-0383    00FD    3007    	MOVLW	B'00000111' ;LE ENVIAMOS A W EL NUMERO 7 EN BINARIO EN 8 BITS
-0384    00FE    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0385    00FF    1903    	BTFSC	STATUS,Z
-0386    0100    2921    	GOTO	MOSTRAR7
-0387    0101            
-0388    0101    3008    	MOVLW	B'00001000' ;LE ENVIAMOS A W EL NUMERO 8 EN BINARIO EN 8 BITS
-0389    0102    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0390    0103    1903    	BTFSC	STATUS,Z
-0391    0104    2924    	GOTO	MOSTRAR8
-0392    0105            
-0393    0105    3009    	MOVLW	B'00001001' ;LE ENVIAMOS A W EL NUMERO 9 EN BINARIO EN 8 BITS
-0394    0106    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
-0395    0107    1903    	BTFSC	STATUS,Z
-0396    0108    2927    	GOTO	MOSTRAR9
-0397    0109            	
-0398    0109    3000    	MOVLW	B'00000000'
-0399    010A    0086    	MOVWF	PORTB
-0400    010B    28A2    	GOTO	LEER_E_BTN
-0401    010C            
-0402    010C            MOSTRAR0
-0403    010C    303F    	MOVLW B'00111111' ; EN BINARIO PONEMOS 0 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0404    010D    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0405    010E    3400    	RETLW	B'00000000'
-0406    010F            
-0407    010F            MOSTRAR1
-0408    010F    30F9    	MOVLW B'11111001' ; EN BINARIO PONEMOS 1 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0409    0110    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0410    0111    3400    	RETLW	B'00000000'
-0411    0112            
-0412    0112            MOSTRAR2
-0413    0112    30A4    	MOVLW B'10100100' ; EN BINARIO PONEMOS 2 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0414    0113    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0415    0114    3400    	RETLW	B'00000000'
-0416    0115            
-0417    0115            MOSTRAR3
-0418    0115    30B0    	MOVLW B'10110000' ; EN BINARIO PONEMOS 3 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0419    0116    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0420    0117    3400    	RETLW	B'00000000'
-0421    0118            		
-0422    0118            MOSTRAR4
-0423    0118    3099    	MOVLW B'10011001' ; EN BINARIO PONEMOS 4 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0424    0119    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0425    011A    3400    	RETLW	B'00000000'
-0426    011B            
-0427    011B            MOSTRAR5
-0428    011B    306D    	MOVLW B'01101101' ; EN BINARIO PONEMOS 5 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0429    011C    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0430    011D    3400    	RETLW	B'00000000'
-0431    011E            
-0432    011E            MOSTRAR6
-0433    011E    307D    	MOVLW B'01111101' ; EN BINARIO PONEMOS 6 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0434    011F    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0435    0120    3400    	RETLW	B'00000000'
-0436    0121            
-0437    0121            MOSTRAR7
-0438    0121    30F8    	MOVLW B'11111000' ; EN BINARIO PONEMOS 7 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0439    0122    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0440    0123    3400    	RETLW	B'00000000'
-0441    0124            
-0442    0124            MOSTRAR8
-0443    0124    3080    	MOVLW B'10000000' ; EN BINARIO PONEMOS 8 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0444    0125    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0445    0126    3400    	RETLW	B'00000000'
-0446    0127            
-0447    0127            MOSTRAR9
-0448    0127    3098    	MOVLW B'10011000' ; EN BINARIO PONEMOS 9 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
-0449    0128    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
-0450    0129    3400    	RETLW	B'00000000'
-0451    012A            
+0026    0000            ;------------------------------Variables Foto Resistencia
+0027    0000            ADC EQU 0x2F
+0028    0000            CON EQU 0X30
+0029    0000            CON2 EQU 0X31
+0030    0000            CON3 EQU 0X32
+0031    0000            MAYOR_LUZR EQU 0x33
+0032    0000            MENOR_LUZR EQU 0x34
+0033    0000            CATEGORIA EQU 0X35
+0034    0000            
+0035    0000            
+0036    0000            INICIO
+0037    0000            ;Inicio del programa ASIGNACIONES VARIABLES
+0038    0000            	ORG	0X00
+0039    0000            
+0040    0000            ;------------------------CONFIGURACIONES PUERTOS --------------------------------------
+0041    0000            ;------------------------------ PUERTO A y E JEFF --------------------------------------
+0042    0000    1283    	bcf STATUS,RP0 ;Ir banco 0
+0043    0001    1303    	bcf STATUS,RP1
+0044    0002    3041    	movlw b'01000001' ;A/D conversion Fosc/8
+0045    0003    009F    	movwf ADCON0
+0046    0004            	;     	     7     6     5    4    3    2       1 0
+0047    0004            	; 1Fh ADCON0 ADCS1 ADCS0 CHS2 CHS1 CHS0 GO/DONE ? ADON
+0048    0004    1683    	bsf STATUS,RP0 ;Ir banco 1
+0049    0005    1303    	bcf STATUS,RP1
+0050    0006    3007    	movlw b'00000111'
+0051    0007    0081    	movwf OPTION_REG ;TMR0 preescaler, 1:156
+0052    0008            	;                7    6      5    4    3   2   1   0 
+0053    0008            	; 81h OPTION_REG RBPU INTEDG T0CS T0SE PSA PS2 PS1 PS0
+0054    0008    300E    	movlw b'00001110' ;A/D Port AN0/RA0
+0055    0009    009F    	movwf ADCON1
+0056    000A            	;            7    6     5 4 3     2     1     0 
+0057    000A            	; 9Fh ADCON1 ADFM ADCS2 ? ? PCFG3 PCFG2 PCFG1 PCFG0
+0058    000A    1405    	bsf TRISA,0 ;RA0 linea de entrada para el ADC
+0059    000B    1283    	bcf STATUS,RP0 ;Ir banco 0
+0060    000C    1303    	bcf STATUS,RP1
+0061    000D            
+0062    000D            ;------------------------------ PUERTO A y E --------------------------------------
+0063    000D    3000    	MOVLW b'00000000'
+0064    000E    00AB    	MOVWF ContadorBTN
+0065    000F    00AE    	MOVWF DATO_DISPLAY
+0066    0010            	
+0067    0010            
+0068    0010            ;----Desactive estas configuraiones para poder ver lo de JEFF
+0069    0010            	;BSF     STATUS,RP0
+0070    0010                ;BCF     STATUS,RP1
+0071    0010                ;MOVLW   D'14'
+0072    0010                ;MOVWF   ADCON1
+0073    0010            	;MOVLW	B'111'
+0074    0010                ;MOVWF   TRISE
+0075    0010                ;BCF     STATUS,RP0
+0076    0010                ;BCF     STATUS,RP1
+0077    0010            
+0078    0010    3007        	MOVLW   D'7'
+0079    0011    00AD        	MOVWF   NumGrupo
+0080    0012            ;------------------------------ PUERTO B --------------------------------------
+0081    0012    1683    	BSF STATUS, 5 ;PONE 1 EN STATUS BIT 5 PARA MOVERNOS AL BANCO 1
+0082    0013    0186    	CLRF TRISB; PONE EN 0 TRIS B Y LA BANDERA Z PONE SALIDA B 
+0083    0014    0187    	CLRF TRISC; HABILITA EL PUERTO C COMO SALIDA
+0084    0015            
+0085    0015    0100    	CLRW; LIMPIAR W 
+0086    0016    1283    	BCF STATUS, 5; PONE UN 0 EN BIT 5 Y NOS MOVEMOS AL BANCO 0 
+0087    0017    3004    	MOVLW	4
+0088    0018    00A8    	MOVWF	NumeroIteracionesX
+0089    0019            ;------------------------------ PUERTO C --------------------------------------
+0090    0019    3000    	MOVLW B'00000000'
+0091    001A    00AE    	MOVWF DATO_DISPLAY
+0092    001B            
+0093    001B            
+0094    001B            
+0095    001B            
+0096    001B            
+0097    001B            
+0098    001B            
+0099    001B            ;PRUEBA para regresar el motor al mayor de luz  ELIMINAR
+0100    001B    3001    	MOVLW	1 ; Moviendo a w El numero de iteraciones que vaya
+0101    001C    00A9    	MOVWF	IrMayorXIteracion 
+0102    001D    302D    	MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
+0103    001E    00AA    	MOVWF	IrMayorPasosY 
+0104    001F            
+0105    001F    2820    	GOTO	MENU ;mueve el ip al punto de la etiqueta
+0106    0020            
+0107    0020            ;--------------------------MENU PROGRAMA-------------------------------
+0108    0020            MENU 
+0109    0020            	;CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
+0110    0020            	;CALL	IrMayorLuz;Moverme a Buscar LUz
+0111    0020    28A7    	GOTO	LEER_E_BTN
+0112    0021            	;GOTO FotoResistencia
+0113    0021    2888    	GOTO	SALIR	
+0114    0022            
+0115    0022            
+0116    0022            ;------------------------------ MOTORES INICIO --------------------------------------
+0117    0022            LOOP_GENERAL
+0118    0022    3080    	MOVLW	128
+0119    0023    00A4    	MOVWF	PasosX
+0120    0024    00A5    	MOVWF	PasosRegresoX
+0121    0025    2035    	CALL	MOVER_X
+0122    0026    3080    	MOVLW	128
+0123    0027    00A6    	MOVWF	PasosY
+0124    0028    00A7    	MOVWF	PasosRegresoY 
+0125    0029    2060    	CALL	CORRIDAY
+0126    002A    0BA8    	DECFSZ	NumeroIteracionesX, 1
+0127    002B    2822    	GOTO	LOOP_GENERAL
+0128    002C    3004    	MOVLW	4
+0129    002D    00A8    	MOVWF	NumeroIteracionesX
+0130    002E    282F    	GOTO	LOOP_REGRESO_X
+0131    002F            
+0132    002F            LOOP_REGRESO_X
+0133    002F    3080    	MOVLW	128
+0134    0030    00A5    	MOVWF	PasosRegresoX
+0135    0031    2051    	CALL	REGRESOX
+0136    0032    0BA8    	DECFSZ	NumeroIteracionesX, 1
+0137    0033    282F    	GOTO	LOOP_REGRESO_X
+0138    0034            	;GOTO	FIN
+0139    0034    3400    	RETLW	B'00000000'
+0140    0035            
+0141    0035            MOVER_X
+0142    0035    300C    	MOVLW	B'00001100'
+0143    0036    0086    	MOVWF	PORTB
+0144    0037    2044    	CALL	DelayOneSecond
+0145    0038    3006    	MOVLW	B'00000110'
+0146    0039    0086    	MOVWF	PORTB
+0147    003A    2044    	CALL	DelayOneSecond
+0148    003B    3003    	MOVLW	B'00000011'
+0149    003C    0086    	MOVWF	PORTB
+0150    003D    2044    	CALL	DelayOneSecond
+0151    003E    3009    	MOVLW	B'00001001'
+0152    003F    0086    	MOVWF	PORTB
+0153    0040    2044    	CALL	DelayOneSecond
+0154    0041    0BA4    	DECFSZ	PasosX,1
+0155    0042    2835    	GOTO	MOVER_X
+0156    0043    3400    	RETLW	B'00000000'
+0157    0044            
+0158    0044            DelayOneSecond
+0159    0044    3001    	movlw D'1'
+0160    0045    00A3    	movwf CounterC
+0161    0046    3004    	movlw D'4'
+0162    0047    00A2    	movwf CounterB
+0163    0048    3004    	movlw D'4'
+0164    0049    00A1    	movwf CounterA
+0165    004A            
+0166    004A            Loop_Delay
+0167    004A    0BA1    	decfsz CounterA,1
+0168    004B    284A    	goto Loop_Delay
+0169    004C    0BA2    	decfsz CounterB,1
+0170    004D    284A    	goto Loop_Delay
+0171    004E    0BA3    	decfsz CounterC,1
+0172    004F    284A    	goto Loop_Delay
+0173    0050    3400    	RETLW	b'00000000'
+0174    0051            
+0175    0051            REGRESOX
+0176    0051    3009    	MOVLW	B'00001001'
+0177    0052    0086    	MOVWF	PORTB
+0178    0053    2044    	CALL	DelayOneSecond
+0179    0054    3003    	MOVLW	B'00000011'
+0180    0055    0086    	MOVWF	PORTB
+0181    0056    2044    	CALL	DelayOneSecond
+0182    0057    3006    	MOVLW	B'00000110'
+0183    0058    0086    	MOVWF	PORTB
+0184    0059    2044    	CALL	DelayOneSecond
+0185    005A    300C    	MOVLW	B'00001100'
+0186    005B    0086    	MOVWF	PORTB
+0187    005C    2044    	CALL	DelayOneSecond
+0188    005D    0BA5    	DECFSZ	PasosRegresoX,1
+0189    005E    2851    	GOTO	REGRESOX
+0190    005F    3400    	RETLW	B'00000000'
+0191    0060            
+0192    0060            CORRIDAY
+0193    0060    30C0       	MOVLW	B'11000000'
+0194    0061    0086    	MOVWF	PORTB
+0195    0062    2044    	CALL	DelayOneSecond
+0196    0063    3060    	MOVLW	B'01100000'
+0197    0064    0086    	MOVWF	PORTB
+0198    0065    2044    	CALL	DelayOneSecond
+0199    0066    3030    	MOVLW	B'00110000'
+0200    0067    0086    	MOVWF	PORTB
+0201    0068    2044    	CALL	DelayOneSecond
+0202    0069    3090    	MOVLW	B'10010000'
+0203    006A    0086    	MOVWF	PORTB
+0204    006B    2044    	CALL	DelayOneSecond
+0205    006C    0BA6    	DECFSZ	PasosY ,1
+0206    006D    2860    	GOTO	CORRIDAY
+0207    006E    286F    	GOTO	REGRESOY
+0208    006F            
+0209    006F            REGRESOY
+0210    006F    3090        	MOVLW	B'10010000'
+0211    0070    0086    	MOVWF	PORTB
+0212    0071    2044    	CALL	DelayOneSecond
+0213    0072    3030    	MOVLW	B'00110000'
+0214    0073    0086    	MOVWF	PORTB
+0215    0074    2044    	CALL	DelayOneSecond
+0216    0075    3060    	MOVLW	B'01100000'
+0217    0076    0086    	MOVWF	PORTB
+0218    0077    2044    	CALL	DelayOneSecond
+0219    0078    30C0    	MOVLW	B'11000000'
+0220    0079    0086    	MOVWF	PORTB
+0221    007A    2044    	CALL	DelayOneSecond
+0222    007B    0BA7    	DECFSZ	PasosRegresoY ,1
+0223    007C    286F    	GOTO	REGRESOY
+0224    007D    3400    	RETLW	B'00000000'
+0225    007E            
+0226    007E            FIN ; NO se utiliza esta etiqueta se comenta en linea 62 
+0227    007E    3000     	MOVLW	B'00000000'
+0228    007F    0086    	MOVWF	PORTB
+0229    0080    3400    	RETLW	B'00000000'
+0230    0081            	;Call	IrMayorLuz
+0231    0081            
+0232    0081            
+0233    0081            IrMayorLuz
+0234    0081    3080    	MOVLW	128
+0235    0082    00A4    	MOVWF	PasosX
+0236    0083    2089    	CALL	FullMayorX
+0237    0084    0BA9    	DECFSZ	IrMayorXIteracion , 1
+0238    0085    2881    	GOTO	IrMayorLuz
+0239    0086    2098    	CALL	FullMayorY
+0240    0087    3400    	RETLW	B'00000000'
+0241    0088            
+0242    0088            SALIR
+0243    0088            	END
+0244    0088    2888    	GOTO SALIR
+0245    0089            
+0246    0089            FullMayorX
+0247    0089    300C    	MOVLW	B'00001100'
+0248    008A    0086    	MOVWF	PORTB
+0249    008B    2044    	CALL	DelayOneSecond
+0250    008C    3006    	MOVLW	B'00000110'
+0251    008D    0086    	MOVWF	PORTB
+0252    008E    2044    	CALL	DelayOneSecond
+0253    008F    3003    	MOVLW	B'00000011'
+0254    0090    0086    	MOVWF	PORTB
+0255    0091    2044    	CALL	DelayOneSecond
+0256    0092    3009    	MOVLW	B'00001001'
+0257    0093    0086    	MOVWF	PORTB
+0258    0094    2044    	CALL	DelayOneSecond
+0259    0095    0BA4    	DECFSZ	PasosX,1
+0260    0096    2889    	GOTO	FullMayorX
+0261    0097    3400    	RETLW	B'00000000'
+0262    0098            
+0263    0098            FullMayorY
+0264    0098    30C0       	MOVLW	B'11000000'
+0265    0099    0086    	MOVWF	PORTB
+0266    009A    2044    	CALL	DelayOneSecond
+0267    009B    3060    	MOVLW	B'01100000'
+0268    009C    0086    	MOVWF	PORTB
+0269    009D    2044    	CALL	DelayOneSecond
+0270    009E    3030    	MOVLW	B'00110000'
+0271    009F    0086    	MOVWF	PORTB
+0272    00A0    2044    	CALL	DelayOneSecond
+0273    00A1    3090    	MOVLW	B'10010000'
+0274    00A2    0086    	MOVWF	PORTB
+0275    00A3    2044    	CALL	DelayOneSecond
+0276    00A4    0BAA    	DECFSZ	IrMayorPasosY ,1
+0277    00A5    2898    	GOTO	FullMayorY
+0278    00A6    3400    	RETLW	B'00000000'
+0279    00A7            
+0280    00A7            ;------------------------------ BOTON E 0 INICIAL -----------------------------------------
+0281    00A7            LEER_E_BTN
+0282    00A7    0809    	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
+0283    00A8    00AC    	MOVWF DatoEnE ;Movemos la variable hacia dato en E
+0284    00A9    3001    	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
+0285    00AA    022C    	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
+0286    00AB    2044    	CALL	DelayOneSecond
+0287    00AC    2044    	CALL	DelayOneSecond
+0288    00AD    2044    	CALL	DelayOneSecond
+0289    00AE    2044    	CALL	DelayOneSecond
+0290    00AF    2044    	CALL	DelayOneSecond
+0291    00B0    2044    	CALL	DelayOneSecond
+0292    00B1    2044    	CALL	DelayOneSecond
+0293    00B2    2044    	CALL	DelayOneSecond
+0294    00B3    2044    	CALL	DelayOneSecond
+0295    00B4    2044    	CALL	DelayOneSecond
+0296    00B5    2044    	CALL	DelayOneSecond
+0297    00B6    2044    	CALL	DelayOneSecond
+0298    00B7    1903    	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+0299    00B8    28BA    	GOTO  CONTAR ; SI LA OPERACION ES 0 SE VA A UN CONTAR
+0300    00B9    28A7    	GOTO  LEER_E_BTN ;REGRESA LOOP LEER
+0301    00BA            
+0302    00BA            CONTAR
+0303    00BA    0A2B    	INCF  ContadorBTN, 0 ;incrementa e ContadorBTN en 1
+0304    00BB    00AB    	MOVWF ContadorBTN
+0305    00BC    3001    	MOVLW b'00000001'
+0306    00BD    022B    	SUBWF ContadorBTN,W
+0307    00BE    1903    	BTFSC STATUS, Z
+0308    00BF    28CC    	GOTO  BTN1
+0309    00C0            
+0310    00C0    3002    	MOVLW b'00000010'
+0311    00C1    022B    	SUBWF ContadorBTN,W
+0312    00C2    1903    	BTFSC STATUS, Z
+0313    00C3    28D2    	GOTO  BTN2
+0314    00C4            
+0315    00C4    3003    	MOVLW b'00000011'
+0316    00C5    022B    	SUBWF ContadorBTN,W
+0317    00C6    1903    	BTFSC STATUS, Z
+0318    00C7    28D8    	GOTO  BTN3
+0319    00C8            
+0320    00C8    3004    	MOVLW b'00000100'
+0321    00C9    022B    	SUBWF ContadorBTN, 0
+0322    00CA    1903    	BTFSC STATUS, Z
+0323    00CB    28DE    	GOTO  BTN4
+0324    00CC            
+0325    00CC            BTN1
+0326    00CC            ;Al iniciar, mostrar cu�nto es el �ndice de luz (escala definida por el grupo)
+0327    00CC    3001    	MOVLW B'00000001'
+0328    00CD    0086    	MOVWF PORTB
+0329    00CE            
+0330    00CE    3001    	MOVLW D'1'
+0331    00CF    00AE    	MOVWF DATO_DISPLAY
+0332    00D0    20E6    	CALL  COMP_DISPLAY
+0333    00D1            
+0334    00D1    28A7    	GOTO  LEER_E_BTN
+0335    00D2            	;Mostrar el primer inciso
+0336    00D2            BTN2
+0337    00D2            ;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la mayor
+0338    00D2            ;cantidad de luz.
+0339    00D2    3002    	MOVLW B'00000010'
+0340    00D3    0086    	MOVWF PORTB
+0341    00D4            	
+0342    00D4    3002    	MOVLW D'2'
+0343    00D5    00AE    	MOVWF DATO_DISPLAY
+0344    00D6            
+0345    00D6    20E6    	CALL  COMP_DISPLAY
+0346    00D7            
+0347    00D7    28A7    	GOTO  LEER_E_BTN
+0348    00D8            	;Mostrar el segundo inciso
+0349    00D8            BTN3
+0350    00D8            ;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la menor
+0351    00D8            ;cantidad de luz.
+0352    00D8    3004    	MOVLW B'00000100'
+0353    00D9    0086    	MOVWF PORTB
+0354    00DA            
+0355    00DA    3003    	MOVLW D'3'
+0356    00DB    00AE    	MOVWF DATO_DISPLAY
+0357    00DC    20E6    	CALL  COMP_DISPLAY
+0358    00DD            
+0359    00DD    28A7    	GOTO  LEER_E_BTN
+0360    00DE            	;Mostrar el tercer inciso
+0361    00DE            BTN4       ;Al presionar la tecla cambiar� y mostrar� cu�l es su n�mero de dispositivo
+0362    00DE    3008    	MOVLW B'00001000'
+0363    00DF    0086    	MOVWF PORTB
+0364    00E0            
+0365    00E0    3000    	MOVLW B'00000000' 
+0366    00E1    00AB    	MOVWF ContadorBTN ;resetea el ContadorBTN para empezar de nuevo
+0367    00E2            
+0368    00E2    3004    	MOVLW D'4'
+0369    00E3    00AE    	MOVWF DATO_DISPLAY
+0370    00E4    20E6    	CALL  COMP_DISPLAY
+0371    00E5    28A7    	GOTO  LEER_E_BTN
+0372    00E6            
+0373    00E6            
+0374    00E6            ;------------------------------ DISPLAY  -----------------------------------------
+0375    00E6            
+0376    00E6            COMP_DISPLAY
+0377    00E6            ;COMPARACION BIT POR BIT 
+0378    00E6    3000    	MOVLW	B'00000000' ;LE ENVIAMOS A W EL NUMERO 0 EN BINARIO EN 8 BITS
+0379    00E7    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0380    00E8    1903    	BTFSC	STATUS,Z
+0381    00E9    2911    	GOTO	MOSTRAR0
+0382    00EA            
+0383    00EA    3001    	MOVLW	B'00000001' ;LE ENVIAMOS A W EL NUMERO 1 EN BINARIO EN 8 BITS
+0384    00EB    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0385    00EC    1903    	BTFSC	STATUS,Z
+0386    00ED    2914    	GOTO	MOSTRAR1
+0387    00EE            
+0388    00EE    3002    	MOVLW	B'00000010' ;LE ENVIAMOS A W EL NUMERO 2 EN BINARIO EN 8 BITS
+0389    00EF    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0390    00F0    1903    	BTFSC	STATUS,Z
+0391    00F1    2917    	GOTO	MOSTRAR2
+0392    00F2            	
+0393    00F2    3003    	MOVLW	B'00000011' ;LE ENVIAMOS A W EL NUMERO 3 EN BINARIO EN 8 BITS
+0394    00F3    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0395    00F4    1903    	BTFSC	STATUS,Z
+0396    00F5    291A    	GOTO	MOSTRAR3
+0397    00F6            
+0398    00F6    3004    	MOVLW	B'00000100' ;LE ENVIAMOS A W EL NUMERO 4 EN BINARIO EN 8 BITS
+0399    00F7    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0400    00F8    1903    	BTFSC	STATUS,Z
+0401    00F9    291D    	GOTO	MOSTRAR4
+0402    00FA            
+0403    00FA    3005    	MOVLW	B'00000101' ;LE ENVIAMOS A W EL NUMERO 5 EN BINARIO EN 8 BITS
+0404    00FB    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0405    00FC    1903    	BTFSC	STATUS,Z
+0406    00FD    2920    	GOTO	MOSTRAR5
+0407    00FE            
+0408    00FE    3006    	MOVLW	B'00000110' ;LE ENVIAMOS A W EL NUMERO 6 EN BINARIO EN 8 BITS
+0409    00FF    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0410    0100    1903    	BTFSC	STATUS,Z
+0411    0101    2923    	GOTO	MOSTRAR6
+0412    0102            
+0413    0102    3007    	MOVLW	B'00000111' ;LE ENVIAMOS A W EL NUMERO 7 EN BINARIO EN 8 BITS
+0414    0103    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0415    0104    1903    	BTFSC	STATUS,Z
+0416    0105    2926    	GOTO	MOSTRAR7
+0417    0106            
+0418    0106    3008    	MOVLW	B'00001000' ;LE ENVIAMOS A W EL NUMERO 8 EN BINARIO EN 8 BITS
+0419    0107    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0420    0108    1903    	BTFSC	STATUS,Z
+0421    0109    2929    	GOTO	MOSTRAR8
+0422    010A            
+0423    010A    3009    	MOVLW	B'00001001' ;LE ENVIAMOS A W EL NUMERO 9 EN BINARIO EN 8 BITS
+0424    010B    022E    	SUBWF	DATO_DISPLAY,W 	;LE VAMOS A QUITAR A DATO_DISPLAY W (DATO_DISPLAY-W)=W
+0425    010C    1903    	BTFSC	STATUS,Z
+0426    010D    292C    	GOTO	MOSTRAR9
+0427    010E            	
+0428    010E    3000    	MOVLW	B'00000000'
+0429    010F    0086    	MOVWF	PORTB
+0430    0110    28A7    	GOTO	LEER_E_BTN
+0431    0111            
+0432    0111            MOSTRAR0
+0433    0111    30C0    	MOVLW B'11000000' ; EN BINARIO PONEMOS 0 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0434    0112    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0435    0113    3400    	RETLW	B'00000000'
+0436    0114            
+0437    0114            MOSTRAR1
+0438    0114    30F9    	MOVLW B'11111001' ; EN BINARIO PONEMOS 1 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0439    0115    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0440    0116    3400    	RETLW	B'00000000'
+0441    0117            
+0442    0117            MOSTRAR2
+0443    0117    30A4    	MOVLW B'10100100' ; EN BINARIO PONEMOS 2 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0444    0118    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0445    0119    3400    	RETLW	B'00000000'
+0446    011A            
+0447    011A            MOSTRAR3
+0448    011A    30B0    	MOVLW B'10110000' ; EN BINARIO PONEMOS 3 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0449    011B    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0450    011C    3400    	RETLW	B'00000000'
+0451    011D            		
+0452    011D            MOSTRAR4
+0453    011D    3099    	MOVLW B'10011001' ; EN BINARIO PONEMOS 4 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0454    011E    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0455    011F    3400    	RETLW	B'00000000'
+0456    0120            
+0457    0120            MOSTRAR5
+0458    0120    3092    	MOVLW B'10010010' ; EN BINARIO PONEMOS 5 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0459    0121    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0460    0122    3400    	RETLW	B'00000000'
+0461    0123            
+0462    0123            MOSTRAR6
+0463    0123    3082    	MOVLW B'10000010' ; EN BINARIO PONEMOS 6 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0464    0124    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0465    0125    3400    	RETLW	B'00000000'
+0466    0126            
+0467    0126            MOSTRAR7
+0468    0126    30F8    	MOVLW B'11111000' ; EN BINARIO PONEMOS 7 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0469    0127    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0470    0128    3400    	RETLW	B'00000000'
+0471    0129            
+0472    0129            MOSTRAR8
+0473    0129    3080    	MOVLW B'10000000' ; EN BINARIO PONEMOS 8 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0474    012A    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0475    012B    3400    	RETLW	B'00000000'
+0476    012C            
+0477    012C            MOSTRAR9
+0478    012C    3098    	MOVLW B'10011000' ; EN BINARIO PONEMOS 9 LOS NECESARIOS PARA PREDER EL DISPLAY EN 0
+0479    012D    0087    	MOVWF PORTC	;MOVEMOS LOS BINARIOS A PORT B 
+0480    012E    3400    	RETLW	B'00000000'
+0481    012F            
+0482    012F            ;------------------------------FOTO RESISTENCIA  -----------------------------------------
+0483    012F            FotoResistencia
+0484    012F    2134    	CALL _bucle
+0485    0130    0835    	MOVF	CATEGORIA,W
+0486    0131    00AE    	MOVWF DATO_DISPLAY
+0487    0132    20E6    	CALL  COMP_DISPLAY
+0488    0133    292F    	GOTO FotoResistencia
+0489    0134            
+0490    0134            _bucle
+0491    0134            	;btfss INTCON,T0IF
+0492    0134            	;goto _bucle ;Esperar que el timer0 desborde
+0493    0134            	; SE DEBE DE COLOCAR UN DELAY PARA QUE ESPERE LA CONVERSION
+0494    0134    1503    	BSF  STATUS,Z
+0495    0135    2147    	CALL _PRESPERA
+0496    0136    110B    	bcf INTCON,T0IF ;Limpiar el indicador de desborde
+0497    0137    151F    	bsf ADCON0,GO ;Comenzar conversion A/D
+0498    0138            _espera
+0499    0138    191F    	btfsc ADCON0,GO ;ADCON0 es 0? (la conversion esta completa?)
+0500    0139    2938    	goto _espera ;No, ir _espera
+0501    013A    081E    	movf ADRESH,W ;Si, W=ADRESH
+0502    013B            	; 1Eh ADRESH A/D Result Register High Byte
+0503    013B            	; 9Eh ADRESL A/D Result Register Low Byte 
+0504    013B    00AF    	movwf ADC ;ADC=W
+0505    013C            	;rrf ADC,F ;ADC /4
+0506    013C            	;rrf ADC,F
+0507    013C            	;bcf ADC,7
+0508    013C            	;bcf ADC,6
+0509    013C    082F    	movfw ADC ;W = ADC
+0510    013D            	;movwf PORTB ;PORTB = W
+0511    013D    2158    	CALL INTERVALOS
+0512    013E    2188    	CALL COMPARACION_Foto
+0513    013F    0008    	RETURN
+0514    0140    3020    	movlw D'32' ;Comparamos el valor del ADC para saber si es menor que 128
+0515    0141    022F    	subwf ADC,W
+0516    0142            	;btfss STATUS,C ;Es mayor a 128?
+0517    0142    2945    	goto _desactivar ;No, desactivar RB7
+0518    0143    1787    	bsf PORTC,7 ;Si, RB7 = 1 logico
+0519    0144    2934    	goto _bucle ;Ir bucle
+0520    0145            _desactivar
+0521    0145    1386    	bcf PORTB,7 ;RB7 = 0 logico
+0522    0146    2934    	goto _bucle ;Ir bucle
+0523    0147            	
+0524    0147            _PRESPERA
+0525    0147    30FF    	MOVLW 0XFF
+0526    0148    00B0    	MOVWF CON
+0527    0149    00B1    	MOVWF CON2
+0528    014A    00B2    	MOVWF CON3	
+0529    014B    214D    	CALL ESPE
+0530    014C    0008    	RETURN	
+0531    014D            
+0532    014D            ESPE
+0533    014D    0BB0    	DECFSZ	CON,0X01
+0534    014E    294D    	GOTO	ESPE
+0535    014F    2151    	CALL	ESPE2
+0536    0150    0008    	RETURN
+0537    0151            ESPE2
+0538    0151    0BB1    	DECFSZ	CON2,0X01
+0539    0152    2951    	GOTO	ESPE2
+0540    0153    2155    	CALL	ESPE3
+0541    0154    0008    	RETURN
+0542    0155            ESPE3
+0543    0155    0BB2    	DECFSZ	CON3,0X01
+0544    0156    2955    	GOTO	ESPE3
+0545    0157    0008    	RETURN
+0546    0158            
+0547    0158            INTERVALOS
+0548    0158    3009    	MOVLW	D'9'
+0549    0159    00B5    	MOVWF	CATEGORIA
+0550    015A            
+0551    015A    30D2    	movlw	d'210'
+0552    015B    022F    	subwf	ADC, 0
+0553    015C    1803    	BTFSc	STATUS, C
+0554    015D    0008    	RETURN
+0555    015E            
+0556    015E    03B5    	DECF	categoria,1
+0557    015F    30C2    	movlw	d'194'
+0558    0160    022F    	subwf	ADC, 0
+0559    0161    1803    	BTFSC STATUS, C
+0560    0162    0008    	return
+0561    0163            
+0562    0163    03B5    	DECF	categoria,1
+0563    0164    30AE    	movlw	d'174'
+0564    0165    022F    	subwf	ADC, 0
+0565    0166    1803    	BTFSC STATUS, C
+0566    0167    0008    	return
+0567    0168            
+0568    0168    03B5    	DECF	categoria,1
+0569    0169    309E    	movlw	d'158'
+0570    016A    022F    	subwf	ADC, 0
+0571    016B    1803    	BTFSC STATUS, C
+0572    016C    0008    	return
+0573    016D            
+0574    016D    03B5    	DECF	categoria,1
+0575    016E    308A    	movlw	d'138'
+0576    016F    022F    	subwf	ADC, 0
+0577    0170    1803    	BTFSC STATUS, C
+0578    0171    0008    	return
+0579    0172            
+0580    0172    03B5    	DECF	categoria,1
+0581    0173    3075    	movlw	d'117'
+0582    0174    022F    	subwf	ADC, 0
+0583    0175    1803    	BTFSC STATUS, C
+0584    0176    0008    	return
+0585    0177            
+0586    0177    03B5    	DECF	categoria,1
+0587    0178    3052    	movlw	d'82'
+0588    0179    022F    	subwf	ADC, 0
+0589    017A    1803    	BTFSC STATUS, C
+0590    017B    0008    	return
+0591    017C            
+0592    017C    03B5    	DECF	categoria,1
+0593    017D    3033    	movlw	d'51'
+0594    017E    022F    	subwf	ADC, 0
+0595    017F    1803    	BTFSC STATUS, C
+0596    0180    0008    	return
+0597    0181            
+0598    0181    03B5    	DECF	categoria,1
+0599    0182    301C    	movlw	d'28'
+0600    0183    022F    	subwf	ADC, 0
+0601    0184    1803    	BTFSC STATUS, C
+0602    0185    0008    	return
+0603    0186            	
+0604    0186    03B5    	DECF	categoria, 1
+0605    0187    0008    	return
+0606    0188            
+0607    0188            COMPARACION_Foto	
+0608    0188    0835    	MOVF	CATEGORIA,W
+0609    0189    0234    	SUBWF	MENOR_LUZR,W	
+0610    018A    1803    	BTFSC	STATUS,C
+0611    018B    2196    	CALL	EntradaMenor
+0612    018C            
+0613    018C    0835    	MOVF	CATEGORIA,W
+0614    018D    0233    	SUBWF	MAYOR_LUZR,W
+0615    018E    1C03    	BTFSS	STATUS,C
+0616    018F    2191    	CALL 	EntradaMayor
+0617    0190            
+0618    0190    0008    	RETURN
+0619    0191            
+0620    0191            EntradaMayor
+0621    0191    0835    	MOVF	CATEGORIA,W
+0622    0192    00B3    	MOVWF	MAYOR_LUZR
+0623    0193    3001    	MOVLW	B'00000001'
+0624    0194    0088    	MOVWF	PORTD
+0625    0195    0008    	RETURN
+0626    0196            
+0627    0196            EntradaMenor
+0628    0196    0835    	MOVF	CATEGORIA,W
+0629    0197    00B4    	MOVWF	MENOR_LUZR
+0630    0198    3002    	MOVLW	B'00000010'
+0631    0199    0088    	MOVWF	PORTD
+0632    019A    0008    	RETURN
 ---------------------------------------------
 Number of errors = 0
