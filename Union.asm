@@ -109,10 +109,12 @@ INICIO
 
 ;--------------------------MENU PROGRAMA-------------------------------
 MENU 
-	;CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
-	;CALL	IrMayorLuz;Moverme a Buscar LUz
-	;GOTO	LEER_E_BTN
-	;GOTO FotoResistencia ;SOlo prueba de foto Resistencia
+	MOVLW	B'00000000'
+	MOVWF	PORTB
+	CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
+	CALL	IrMayorLuz ;Moverme a Buscar LUz
+	GOTO	LEER_E_BTN
+	;GOTO FotoResistencia ;Para Graduar Foto Resistencia 
 	GOTO	SALIR	
 
 
@@ -193,7 +195,8 @@ REGRESOX
 	RETLW	B'00000000'
 
 CORRIDAY
-	CALL BuscarYMarcarFoto ;<---*-*-*-*-*-*-*-*-*-*-*-*Utlima Linea 23/10/2018 12:31 PM
+	CALL	BuscarYMarcarFoto
+   	MOVLW	B'11000000'
 	MOVWF	PORTB
 	CALL	DelayOneSecond
 	MOVLW	B'01100000'
@@ -227,9 +230,9 @@ REGRESOY
 	RETLW	B'00000000'
 
 FIN ; NO se utiliza esta etiqueta se comenta en linea 62 
- 	MOVLW	B'00000000'
-	MOVWF	PORTB
-	RETLW	B'00000000'
+ 	;MOVLW	B'00000000'
+	;MOVWF	PORTB
+	;RETLW	B'00000000'
 	;Call	IrMayorLuz
 
 
@@ -327,20 +330,216 @@ CONTAR
 
 BTN1
 ;Al iniciar, mostrar cu�nto es el �ndice de luz (escala definida por el grupo)
-	MOVLW B'00000001'
-	MOVWF PORTB
+	;MOVLW B'00000001'
+	;MOVWF PORTB
+
+	MOVLW D'0'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
 
 	MOVLW D'1'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'2'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'3'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'4'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'5'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'6'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'7'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'8'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+
+	MOVLW D'9'
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
 
 	GOTO  LEER_E_BTN
 	;Mostrar el primer inciso
 BTN2
 ;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la mayor
 ;cantidad de luz.
-	MOVLW B'00000010'
-	MOVWF PORTB
+	;MOVLW B'00000010'
+	;MOVWF PORTB
 	
 	MOVLW D'2'
 	MOVWF DATO_DISPLAY
@@ -352,8 +551,8 @@ BTN2
 BTN3
 ;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la menor
 ;cantidad de luz.
-	MOVLW B'00000100'
-	MOVWF PORTB
+	;MOVLW B'00000100'
+	;MOVWF PORTB
 
 	MOVLW D'3'
 	MOVWF DATO_DISPLAY
@@ -362,8 +561,8 @@ BTN3
 	GOTO  LEER_E_BTN
 	;Mostrar el tercer inciso
 BTN4       ;Al presionar la tecla cambiar� y mostrar� cu�l es su n�mero de dispositivo
-	MOVLW B'00001000'
-	MOVWF PORTB
+	;MOVLW B'00001000'
+	;MOVWF PORTB
 
 	MOVLW B'00000000' 
 	MOVWF ContadorBTN ;resetea el ContadorBTN para empezar de nuevo
@@ -428,8 +627,8 @@ COMP_DISPLAY
 	BTFSC	STATUS,Z
 	GOTO	MOSTRAR9
 	
-	MOVLW	B'00000000'
-	MOVWF	PORTB
+	;MOVLW	B'00000000'
+	;MOVWF	PORTB
 	GOTO	LEER_E_BTN
 
 MOSTRAR0
@@ -521,15 +720,15 @@ _espera
 	CALL INTERVALOS
 	CALL COMPARACION_Foto
 	RETURN
-	movlw D'32' ;Comparamos el valor del ADC para saber si es menor que 128
-	subwf ADC,W
+	;movlw D'32' ;Comparamos el valor del ADC para saber si es menor que 128
+	;subwf ADC,W
 	;btfss STATUS,C ;Es mayor a 128?
-	goto _desactivar ;No, desactivar RB7
-	bsf PORTC,7 ;Si, RB7 = 1 logico
-	goto _bucle ;Ir bucle
-_desactivar
-	bcf PORTB,7 ;RB7 = 0 logico
-	goto _bucle ;Ir bucle
+	;goto _desactivar ;No, desactivar RB7
+	;bsf PORTC,7 ;Si, RB7 = 1 logico
+	;goto _bucle ;Ir bucle
+;_desactivar
+	;bcf PORTB,7 ;RB7 = 0 logico
+	;goto _bucle ;Ir bucle
 	
 _PRESPERA
 	MOVLW 0XFF
@@ -660,6 +859,7 @@ EntradaMayor_nums
 	;Moviendo la Iteracion X y Moviento en y
 	MOVF 	NumeroIteracionesX,W
 	MOVWF	IrMayorXIteracion
+	INCF	IrMayorXIteracion,1
 
 	MOVF 	PasosY,W
 	MOVWF	IrMayorPasosY
