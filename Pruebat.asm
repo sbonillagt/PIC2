@@ -35,7 +35,6 @@ CATEGORIA EQU 0X35
 Mayor_Encontrado EQU 0x36
 Menor_Encontrado EQU 0x37
 ENTRADA_Comp	EQU 0X38
-ContMotor	EQU 0X39
 
 INICIO
 ;Inicio del programa ASIGNACIONES VARIABLES
@@ -127,8 +126,7 @@ LOOP_GENERAL
 	CALL	MOVER_X
 	MOVLW	128
 	MOVWF	PasosY
-	MOVWF	PasosRegresoY
-	INCF	ContMotor,1
+	MOVWF	PasosRegresoY 
 	CALL	CORRIDAY
 	DECFSZ	NumeroIteracionesX, 1
 	GOTO	LOOP_GENERAL
@@ -331,7 +329,7 @@ CONTAR
 	GOTO  BTN4
 
 BTN1
-;Al iniciar, mostrar cu�nto es el �ndice de luz (escala definida por el grupo)
+;Al iniciar, mostrar cu?nto es el ?ndice de luz (escala definida por el grupo)
 	;MOVLW B'00000001'
 	;MOVWF PORTB
 
@@ -538,7 +536,7 @@ BTN1
 	GOTO  LEER_E_BTN
 	;Mostrar el primer inciso
 BTN2
-;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la mayor
+;Al presionar la tecla cambiar? y deber? mostrar el n?mero del dispositivo con la mayor
 ;cantidad de luz.
 	;MOVLW B'00000010'
 	;MOVWF PORTB
@@ -551,7 +549,7 @@ BTN2
 	GOTO  LEER_E_BTN
 	;Mostrar el segundo inciso
 BTN3
-;Al presionar la tecla cambiar� y deber� mostrar el n�mero del dispositivo con la menor
+;Al presionar la tecla cambiar? y deber? mostrar el n?mero del dispositivo con la menor
 ;cantidad de luz.
 	;MOVLW B'00000100'
 	;MOVWF PORTB
@@ -562,7 +560,7 @@ BTN3
 
 	GOTO  LEER_E_BTN
 	;Mostrar el tercer inciso
-BTN4       ;Al presionar la tecla cambiar� y mostrar� cu�l es su n�mero de dispositivo
+BTN4       ;Al presionar la tecla cambiar? y mostrar? cu?l es su n?mero de dispositivo
 	;MOVLW B'00001000'
 	;MOVWF PORTB
 
@@ -859,9 +857,9 @@ EntradaMayor_nums
 	MOVF	ENTRADA_Comp,W
 	MOVWF	Mayor_Encontrado
 	;Moviendo la Iteracion X y Moviento en y
-	MOVF 	ContMotor,W
+	MOVF 	NumeroIteracionesX,W
 	MOVWF	IrMayorXIteracion
-	;INCF	IrMayorXIteracion,1
+	INCF	IrMayorXIteracion,1
 
 	MOVF 	PasosY,W
 	MOVWF	IrMayorPasosY
