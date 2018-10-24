@@ -91,10 +91,14 @@ INICIO
 	MOVLW	4
 	MOVWF	NumeroIteracionesX
 ;------------------------------ PUERTO C --------------------------------------
-	MOVLW B'00000000'
+	MOVLW B'11111111'
 	MOVWF DATO_DISPLAY
 
-
+;--------------Configuracion de Mayores y menores
+	MOVLW D'0'
+	MOVWF Mayor_Encontrado
+	MOVLW D'9'
+	MOVWF Menor_Encontrado
 
 
 
@@ -291,18 +295,7 @@ LEER_E_BTN
 	MOVWF DatoEnE ;Movemos la variable hacia dato en E
 	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
 	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
 	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
 	GOTO  CONTAR ; SI LA OPERACION ES 0 SE VA A UN CONTAR
 	GOTO  LEER_E_BTN ;REGRESA LOOP LEER
@@ -338,202 +331,62 @@ BTN1
 	MOVLW D'0'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'1'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'2'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'3'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'4'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'5'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'6'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'7'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'8'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'9'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	GOTO  LEER_E_BTN
 	;Mostrar el primer inciso
@@ -875,4 +728,23 @@ EntradaMenor_nums
 	MOVWF	Menor_Encontrado
 	;MOVLW	B'00000010'
 	;MOVWF	PORTD
+	RETURN
+
+Llamada16Delays
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
 	RETURN
