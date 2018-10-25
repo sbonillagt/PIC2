@@ -60,7 +60,7 @@ _espera
 	movfw ADC ;W = ADC
 	;movwf PORTB ;PORTB = W
 	CALL INTERVALOS
-	CALL COMPARACION
+	CALL COMPARACION_Foto
 	RETURN
 	movlw D'32' ;Comparamos el valor del ADC para saber si es menor que 128
 	subwf ADC,W
@@ -155,7 +155,7 @@ INTERVALOS
 	DECF	categoria, 1
 	return
 
-COMPARACION	
+COMPARACION_Foto	
 	MOVF	CATEGORIA,W
 	SUBWF	MENOR_LUZR,W	
 	BTFSC	STATUS,C

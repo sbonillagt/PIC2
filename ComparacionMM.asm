@@ -24,29 +24,29 @@ LEER
 	;MOVF	PORTC,W ; MUEVE LO DEL PUERTO A C A W
 	MOVLW	B'00000000'
 	MOVWF	ENTRADA_Comp
-	GOTO 	COMPARACION
+	GOTO 	Comparacion_nums
 
-COMPARACION	
+Comparacion_nums	
 	MOVF	ENTRADA_Comp,W
 	SUBWF	Menor_Encontrado,W	
 	BTFSC	STATUS,C
-	CALL	EntradaMenor
+	CALL	EntradaMenor_nums
 
 	MOVF	ENTRADA_Comp,W
 	SUBWF	Mayor_Encontrado,W
 	BTFSS	STATUS,C
-	CALL 	EntradaMayor
+	CALL 	EntradaMayor_nums
 
 	RETURN
 
-EntradaMayor
+EntradaMayor_nums
 	MOVF	ENTRADA_Comp,W
 	MOVWF	Mayor_Encontrado
 	MOVLW	B'00000001'
 	MOVWF	PORTD
 	RETURN
 
-EntradaMenor
+EntradaMenor_nums
 	MOVF	ENTRADA_Comp,W
 	MOVWF	Menor_Encontrado
 	MOVLW	B'00000010'
