@@ -93,8 +93,10 @@ INICIO
 	BCF STATUS, 5; PONE UN 0 EN BIT 5 Y NOS MOVEMOS AL BANCO 0 
 
 ;------------------------------ PUERTO C --------------------------------------
+	;MOVLW B'11111111'
+	;MOVWF DATO_DISPLAY
 	MOVLW B'11111111'
-	MOVWF DATO_DISPLAY
+	MOVWF PORTC
 
 ;--------------Configuracion de Mayores y menores
 
@@ -104,7 +106,7 @@ INICIO
 	;MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
 	;MOVWF	IrMayorPasosY 
 
-	GOTO	MENU ;mueve el ip al punto de la etiqueta
+	GOTO	BTN_Inicio ;mueve el ip al punto de la etiqueta
 
 ;--------------------------MENU PROGRAMA-------------------------------
 MENU 
@@ -124,12 +126,14 @@ MENU
 SeteoVariables
 	MOVLW	16
 	MOVWF	NumeroIteracionesX
-	MOVLW D'0'
-	MOVWF Mayor_Encontrado
-	MOVLW D'9'
-	MOVWF Menor_Encontrado
+	MOVLW	D'0'
+	MOVWF	Mayor_Encontrado
+	MOVLW	D'9'
+	MOVWF	Menor_Encontrado
 	MOVLW	B'00000000'
 	MOVWF	PORTB
+	MOVLW	D'0'
+	MOVWF	ContMotorX
 	MOVWF	IrMayorXIteracion
 	MOVWF	IrMayorPasosY
 	Return
@@ -327,11 +331,22 @@ ReiniciarTOTALY
 	GOTO	ReiniciarTOTALY
 	RETLW	B'00000000'
 ;------------------------------ BOTON E 0 INICIAL -----------------------------------------
+BTN_Inicio
+	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
+	MOVWF DatoEnE ;Movemos la variable hacia dato en E
+	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
+	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
+	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+	goto	MENU
+	goto	BTN_Inicio
 LEER_E_BTN
 	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
 	MOVWF DatoEnE ;Movemos la variable hacia dato en E
 	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
 	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
+	CALL	Llamada16Delays
 	CALL	Llamada16Delays
 	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
 	GOTO  CONTAR ; SI LA OPERACION ES 0 SE VA A UN CONTAR
@@ -347,7 +362,7 @@ LEER_E_BTN
 EmpezarDeNuevo
 	CAll	ReiniciarTOTALY
 	Call	ReiniciarTOTALX
-	GOTO	MENU	
+	GOTO	BTN_Inicio	
 
 CONTAR
 	INCF  ContadorBTN, 0 ;incrementa e ContadorBTN en 1
