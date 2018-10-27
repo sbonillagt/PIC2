@@ -40,6 +40,26 @@ ContMotorX	EQU 0X39
 RegresarReiniciarX	EQU 0x3A
 RegresarReiniciarY	Equ 0x3B
 ContMotorY	Equ 0x3C
+;-----------------------------Variables Comunicacion-----------
+DATO_Comunicacion	EQU 0X3D
+CONR	EQU 0X3E
+CONE	EQU 0X3F
+MAYG	EQU 0X40 ; grupo mayor
+MAYV	EQU 0X41 ; valor grupo mayor
+MENG	EQU 0X42 ; grupo menor
+MENV	EQU 0X43 ; valor grupo menor
+MAYBG	EQU 0X44 ; grupo mayor backup
+MAYBV	EQU 0X45 ; valor grupo mayor backup
+MENBG	EQU 0X46 ; grupo menor backup
+MENBV	EQU 0X47 ; valor grupo menor backup
+d1	EQU 0X48
+d2	EQU 0X49
+d3	EQU 0X4A
+Prueba_D	EQU 0x4B
+
+
+
+
 INICIO
 ;Inicio del programa ASIGNACIONES VARIABLES
 	ORG	0X00
@@ -63,6 +83,17 @@ INICIO
 	;            7    6     5 4 3     2     1     0 
 	; 9Fh ADCON1 ADFM ADCS2 ? ? PCFG3 PCFG2 PCFG1 PCFG0
 	bsf TRISA,0 ;RA0 linea de entrada para el ADC
+	BCF		TRISD,4
+	BCF		TRISD,5	
+	BCF		TRISD,6	
+	BCF		TRISD,7
+
+	BSF		TRISD,0
+	BSF		TRISD,1
+	BSF		TRISD,2
+	BSF		TRISD,3
+
+	BSF		TRISA,5
 	bcf STATUS,RP0 ;Ir banco 0
 	bcf STATUS,RP1
 
@@ -89,6 +120,18 @@ INICIO
 	CLRF TRISB; PONE EN 0 TRIS B Y LA BANDERA Z PONE SALIDA B 
 	CLRF TRISC; HABILITA EL PUERTO C COMO SALIDA
 
+	;BCF		TRISD,4
+	;BCF		TRISD,5	
+	;BCF		TRISD,6	
+	;BCF		TRISD,7
+
+	;BSF		TRISD,0
+	;BSF		TRISD,1
+	;BSF		TRISD,2
+	;BSF		TRISD,3
+
+	;BSF		TRISA,5
+
 	CLRW; LIMPIAR W 
 	BCF STATUS, 5; PONE UN 0 EN BIT 5 Y NOS MOVEMOS AL BANCO 0 
 
@@ -105,8 +148,88 @@ INICIO
 	;MOVWF	IrMayorXIteracion 
 	;MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
 	;MOVWF	IrMayorPasosY 
+;--------------------Configuracion de Comunicacion----------------
+	; siempre debemos modificar el registro status antes de utilizar los puertos
+	;BSF	STATUS, 5 
+	;BSF	TRISB, 0 ; env�a datos PORT E ,2
+	;MOVLW	B'00000000'
+	;MOVWF	TRISD
+	
+	;BCF		TRISD,0
+	;BCF		TRISD,1	
+	;BCF		TRISD,2	
+	;BCF		TRISD,3
+	;BSF		TRISD,4
+	;BSF		TRISD,5
+	;BSF		TRISD,6
+	;BSF		TRISD,7
 
-	GOTO	BTN_Inicio ;mueve el ip al punto de la etiqueta
+	;BCF	TRISB, 1
+	;BCF	TRISB, 2
+	;BCF	TRISB, 3
+	;BCF	TRISB, 4
+	;BSF	TRISC, 0 ; BIT 0 recibir
+	;BSF	TRISC, 1 ; BIT 1 recibir
+	;BSF	TRISC, 2 ; BIT 2 recibir
+	;BSF	TRISC, 3 ; BIT 3 recibir
+	;BSF	TRISD, 0 ; identifica que tiene que recibir datos PORTA, 5
+	;BCF 	STATUS, RP0
+	MOVLW   B'00000001'
+	MOVWF	CONE
+	MOVWF	CONR
+	;------------Datos Prueba
+	;MOVLW	B'00000001'
+	;MOVWF	MAYG
+	;MOVWF	MENG
+	;MOVLW	B'00000101'
+	;MOVWF	MAYV
+	;MOVWF	MENV
+	
+	movlw	B'00000000'
+	MOVWF	PORTD
+	
+	;Goto	PruebaA	
+	GOTO	BTN_Inicio ;mueve el ip al punto de la etiqueta <$%^&*&^%$#%^&*&^%$#%^&^%$#$%^&
+	
+	;MOVLW D'1'
+	;MOVWF	MAYG
+	;MOVLW D'1'
+	;MOVWF	MENG
+
+	;MOVLW D'9'
+	;MOVWF	Mayor_Encontrado
+
+	;MOVF	Mayor_Encontrado,W
+	;MOVWF	MAYV
+	;MOVF	Mayor_Encontrado,W
+	;MOVWF	MENV
+	;GOTO	LEER_E_BTN
+
+
+
+;PruebaA
+;	BTFSC	PORTA, 5
+;	GOTO	PruebaB
+;	GOTO	PruebaA
+
+;PruebaB
+;	MOVLW B'00001111'
+;	MOVWF	PORTB
+;
+;	MOVF PORTD, W ;Movemos lo de PUERTO E hacia W
+;	MOVWF DatoEnE ;Movemos la variable hacia dato en E
+;	MOVLW B'00001111'
+;	SUBWF DatoEnE,w
+;	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+;	GOTO  PruebaC ; SI LA OPERACION ES 0 SE VA A UN CONTAR
+;	GOTO	PruebaB
+
+;PruebaC
+;	MOVLW B'11110000'
+;	MOVWF	PORTB
+;	Goto	PruebaA
+
+
 
 ;--------------------------MENU PROGRAMA-------------------------------
 MENU 
@@ -119,6 +242,21 @@ MENU
 	MOVWF	RegresarReiniciarY
 
 	CALL	IrMayorLuz ;Moverme a Buscar LUz
+	
+	MOVLW	D'1'
+	MOVWF	MAYG
+	MOVLW	D'1'
+	MOVWF	MENG
+
+	MOVF	Mayor_Encontrado,W
+	MOVWF	MAYV
+	MOVF	Mayor_Encontrado,W
+	MOVWF	MENV
+
+	movlw	B'00000000'
+	MOVWF	PORTB
+
+
 	GOTO	LEER_E_BTN
 	;GOTO FotoResistencia ;Para Graduar Foto Resistencia 
 	GOTO	SALIR	
@@ -339,9 +477,11 @@ BTN_Inicio
 	CALL	Llamada16Delays
 	CALL	Llamada16Delays
 	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
-	goto	MENU
+	goto	MENU  ;<----------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	goto	BTN_Inicio
 LEER_E_BTN
+
+
 	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
 	MOVWF DatoEnE ;Movemos la variable hacia dato en E
 	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
@@ -356,6 +496,32 @@ LEER_E_BTN
 	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
 	GOTO  EmpezarDeNuevo ; SI LA OPERACION ES 0 SE VA A UN CONTAR
 
+	;MOVLW B'010'
+	;SUBWF DatoEnE,w
+	;BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+	;CALL  MENU_Comunicacion ; SI LA OPERACION ES 0 SE VA A UN CONTAR
+
+	;CALL	DELAY
+	BTFSC   PORTE, 1 ; si el bit de enviar enta encendido va a enviar datos
+	CALL	ENVIARDEC
+	;CALL	DELAY
+
+	BTFSC	PORTA, 5
+	CALL	RECIBIRDEC
+
+	;CALL	DELAY
+
+
+	;MENU_ComunicacionB
+	;
+	;CALL	DELAY
+	;MOVLW B'010'
+	;SUBWF DatoEnE,w
+	;BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+	;CALL	ENVIARDEC
+	;CALL	DELAY
+	;BTFSC	PORTA, 5
+	;CALL	RECIBIRDEC
 
 	GOTO  LEER_E_BTN ;REGRESA LOOP LEER
 
@@ -392,65 +558,17 @@ BTN1
 	;MOVLW B'00000001'
 	;MOVWF PORTB
 
-	MOVLW D'0'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
+	;MOVLW D'0'
+	;MOVWF DATO_DISPLAY
+	;CALL  COMP_DISPLAY
+	;CALL	Llamada16Delays
+	;CALL	Llamada16Delays
 
-	MOVLW D'1'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
+	MOVF 	Mayor_Encontrado,w
+	MOVWF 	DATO_DISPLAY
+	CALL	COMP_DISPLAY
 	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'2'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'3'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'4'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'5'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'6'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'7'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'8'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
-
-	MOVLW D'9'
-	MOVWF DATO_DISPLAY
-	CALL  COMP_DISPLAY
-	CALL	Llamada16Delays
-	CALL	Llamada16Delays
+	CAll	Llamada16Delays
 
 	GOTO  LEER_E_BTN
 	;Mostrar el primer inciso
@@ -460,10 +578,12 @@ BTN2
 	;MOVLW B'00000010'
 	;MOVWF PORTB
 	
-	MOVLW D'2'
+	;MOVLW D'2'
+	MOVF	MAYG,W
 	MOVWF DATO_DISPLAY
-
 	CALL  COMP_DISPLAY
+	CALL	Llamada16Delays
+	CAll	Llamada16Delays
 
 	GOTO  LEER_E_BTN
 	;Mostrar el segundo inciso
@@ -473,9 +593,12 @@ BTN3
 	;MOVLW B'00000100'
 	;MOVWF PORTB
 
-	MOVLW D'3'
+	;MOVLW D'3'
+	MOVF	MENG,W
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
+	CALL	Llamada16Delays
+	CAll	Llamada16Delays
 
 	GOTO  LEER_E_BTN
 	;Mostrar el tercer inciso
@@ -486,9 +609,11 @@ BTN4       ;Al presionar la tecla cambiar� y mostrar� cu�l es su n�mero 
 	MOVLW B'00000000' 
 	MOVWF ContadorBTN ;resetea el ContadorBTN para empezar de nuevo
 
-	MOVLW D'4'
+	MOVLW D'1'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
+	CALL	Llamada16Delays
+	CAll	Llamada16Delays
 	GOTO  LEER_E_BTN
 
 
@@ -612,6 +737,8 @@ BuscarYMarcarFoto
 	Call _bucle
 	MovF categoria,W
 	MOVWF ENTRADA_Comp
+	MOVWF DATO_DISPLAY
+	CALL  COMP_DISPLAY
 	Call Comparacion_nums
 	RETURN
 
@@ -816,3 +943,300 @@ Llamada16Delays
 
 ;--------------------------------------REINICIAR-------------------------------------------
 
+;-------------------------------CONFIGURACION COMUNICACION----------------------------------
+MENU_Comunicacion
+	CALL	DELAY
+	BTFSC   PORTE, 1 ; si el bit de enviar enta encendido va a enviar datos
+	CALL	ENVIARDEC
+	CALL	DELAY
+	RETURN
+
+MENU_ComunicacionB
+
+	BTFSC	PORTA, 5
+	CALL	RECIBIRDEC
+	CALL	DELAY
+	Return
+
+ENVIARDEC ; Decide que enviar encicladamente
+	CALL	DELAY
+	MOVLW	B'00000001'
+	SUBWF	CONE, 0
+	BTFSC	STATUS, Z
+	CALL	ENVIARGM ; enviar grupo mayor
+	CALL	DELAY
+	MOVLW	B'00000010'
+	SUBWF	CONE, 0
+	BTFSC	STATUS, Z
+	CALL	ENVIARVM ; enviar valor mayor
+	CALL	DELAY
+	MOVLW	B'00000011'
+	SUBWF	CONE, 0
+	BTFSC	STATUS, Z
+	CALL	ENVIARGMM ; enviar grupo menor
+	CALL	DELAY
+	MOVLW	B'00000100'
+	SUBWF	CONE, 0
+	BTFSC	STATUS, Z
+	CALL	ENVIARVMM ; enviar valor menor
+	CALL	DELAY
+	MOVLW	B'00000101'
+	SUBWF	CONE, 0
+	BTFSC	STATUS, Z
+	CALL	FINENV; hacer comparacion	
+	INCF	CONE, 1	
+	RETURN
+
+SETBITS
+	BTFSC	DATO_Comunicacion, 0
+	GOTO	SET11
+	GOTO	SET10
+SETBITS1
+	BTFSC	DATO_Comunicacion, 1
+	GOTO	SET21
+	GOTO	SET20
+SETBITS2
+	BTFSC	DATO_Comunicacion, 2
+	GOTO	SET31
+	GOTO	SET30
+SETBITS3
+	BTFSC	DATO_Comunicacion, 3
+	GOTO	SET41
+	GOTO	SET40
+ENDSET
+	RETURN	
+
+SET11
+	BSF	PORTD, 4
+	GOTO	SETBITS1
+SET10
+	BCF	PORTD, 4
+	GOTO	SETBITS1
+	
+SET21
+	BSF	PORTD, 5
+	GOTO	SETBITS2
+SET20
+	BCF	PORTD, 5
+	GOTO	SETBITS2
+	
+SET31
+	BSF	PORTD, 6
+	GOTO	SETBITS3
+SET30
+	BCF	PORTD, 6
+	GOTO	SETBITS3
+	
+SET41
+	BSF	PORTD, 7
+	GOTO	ENDSET
+SET40
+	BCF	PORTD, 7
+	GOTO	ENDSET
+	
+ENVIARGM
+	MOVF	MAYG, W
+	MOVWF 	DATO_Comunicacion
+	CALL	SETBITS
+	BTFSC	PORTE, 1
+	GOTO	ENVIARGM 
+	RETURN
+	
+ENVIARVM
+	MOVF	MAYV, W
+	MOVWF 	DATO_Comunicacion
+	CALL	SETBITS	
+	BTFSC	PORTE, 1
+	GOTO	ENVIARVM 
+	RETURN
+	
+ENVIARGMM
+	MOVF	MENG, W
+	MOVWF 	DATO_Comunicacion
+	CALL	SETBITS	
+	BTFSC	PORTE, 1
+	GOTO	ENVIARGMM 
+	RETURN
+	
+ENVIARVMM
+	MOVF	MENV, W
+	MOVWF 	DATO_Comunicacion
+	CALL	SETBITS	
+	BTFSC	PORTE, 1
+	GOTO	ENVIARVMM 
+	RETURN
+
+RECIBIRDEC ; recibe encicladamente
+	CALL	DELAY
+	MOVLW	B'00000001'
+	SUBWF	CONR, 0
+	BTFSC	STATUS, Z
+	CALL	RECIBIRGM ; enviar grupo mayor
+	CALL	DELAY
+	MOVLW	B'00000010'
+	SUBWF	CONR, 0
+	BTFSC	STATUS, Z
+	CALL	RECIBIRVM ; enviar valor mayor
+	CALL	DELAY
+	MOVLW	B'00000011'
+	SUBWF	CONR, 0
+	BTFSC	STATUS, Z
+	CALL	RECIBIRGMM ; enviar grupo menor
+	CALL	DELAY
+	MOVLW	B'00000100'
+	SUBWF	CONR, 0
+	BTFSC	STATUS, Z
+	CALL	RECIBIRVMM ; enviar valor menor	
+	CALL	DELAY
+	MOVLW	B'00000101'
+	SUBWF	CONR, 0
+	BTFSC	STATUS, Z
+	CALL	FINREC; hacer comparacion	
+	INCF	CONR, 1			
+	RETURN
+	
+FINREC
+	MOVLW	B'00000000'
+	MOVWF   CONR
+	CALL	COMPAREMAYORG
+	CALL	COMPAREMENORG
+	BTFSC	PORTA, 5
+	GOTO	FINREC 
+	RETURN
+	
+FINENV
+	MOVLW	B'00000000'
+	MOVWF   CONE
+	BTFSC	PORTE, 1
+	GOTO	FINENV
+	RETURN
+	
+SET11R
+	BSF	DATO_Comunicacion, 0
+	GOTO	SETBITS1R
+SET10R
+	BCF	DATO_Comunicacion, 0
+	GOTO	SETBITS1R
+	
+SET21R
+	BSF	DATO_Comunicacion, 1
+	GOTO	SETBITS2R
+SET20R
+	BCF	DATO_Comunicacion, 1
+	GOTO	SETBITS2R
+	
+SET31R
+	BSF	DATO_Comunicacion, 2
+	GOTO	SETBITS3R
+SET30R
+	BCF	DATO_Comunicacion, 2
+	GOTO	SETBITS3R
+	
+SET41R
+	BSF	DATO_Comunicacion, 3
+	GOTO	ENDSETR
+SET40R
+	BCF	DATO_Comunicacion, 3
+	GOTO	ENDSETR
+
+SETBITSR
+	BTFSC	PORTD, 0
+	GOTO	SET11R
+	GOTO	SET10R
+SETBITS1R
+	BTFSC	PORTD, 1
+	GOTO	SET21R
+	GOTO	SET20R
+SETBITS2R
+	BTFSC	PORTD, 2
+	GOTO	SET31R
+	GOTO	SET30R
+SETBITS3R
+	BTFSC	PORTD, 3
+	GOTO	SET41R
+	GOTO	SET40R
+ENDSETR
+	RETURN	
+
+	
+RECIBIRGM
+	CALL	SETBITSR
+	MOVF	DATO_Comunicacion, W
+	MOVWF	MAYBG
+	BTFSC	PORTA, 5
+	GOTO	RECIBIRGM 
+	RETURN	
+	
+RECIBIRVM
+	CALL	SETBITSR
+	MOVF	DATO_Comunicacion, W
+	MOVWF	MAYBV
+	BTFSC	PORTA, 5
+	GOTO	RECIBIRVM 
+	RETURN
+
+RECIBIRGMM
+	CALL	SETBITSR
+	MOVF	DATO_Comunicacion, W
+	MOVWF	MENBG
+	BTFSC	PORTA, 5
+	GOTO	RECIBIRGMM 
+	RETURN	
+
+RECIBIRVMM
+	CALL	SETBITSR
+	MOVF	DATO_Comunicacion, W
+	MOVWF	MENBV
+	BTFSC	PORTA, 5
+	GOTO	RECIBIRVMM 
+	RETURN
+
+COMPAREMAYORG 
+	MOVF  MAYV, W
+	SUBWF MAYBV, W
+	BTFSS STATUS, C       
+	GOTO  NOCHANGEMAY
+	GOTO  CHANGEMAY	                        
+
+CHANGEMAY
+	MOVF  MAYBG, W 
+        MOVWF MAYG
+        MOVF  MAYBV, W
+        MOVWF MAYV
+	RETURN
+
+NOCHANGEMAY
+	RETURN
+	
+COMPAREMENORG 
+	MOVF  MENV, W
+	SUBWF MENBV, W
+	BTFSS STATUS, C  
+	GOTO  CHANGEMEN     
+	GOTO  NOCHANGEMEN	                        
+
+CHANGEMEN
+	MOVF  MENBG, W 
+        MOVWF MENG
+        MOVF  MENBV, W
+        MOVWF MENV
+	RETURN
+
+NOCHANGEMEN
+	RETURN
+	
+	
+DELAY
+	movlw	0x87
+	movwf	d1
+	movlw	0x14
+	movwf	d2
+Delay_0
+	decfsz	d1, f
+	goto	$+2
+	decfsz	d2, f
+	goto	Delay_0
+
+			;2 cycles
+	goto	$+1
+	RETURN

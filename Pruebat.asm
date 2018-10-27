@@ -35,7 +35,11 @@ CATEGORIA EQU 0X35
 Mayor_Encontrado EQU 0x36
 Menor_Encontrado EQU 0x37
 ENTRADA_Comp	EQU 0X38
+ContMotorX	EQU 0X39
 
+RegresarReiniciarX	EQU 0x3A
+RegresarReiniciarY	Equ 0x3B
+ContMotorY	Equ 0x3C
 INICIO
 ;Inicio del programa ASIGNACIONES VARIABLES
 	ORG	0X00
@@ -87,17 +91,14 @@ INICIO
 
 	CLRW; LIMPIAR W 
 	BCF STATUS, 5; PONE UN 0 EN BIT 5 Y NOS MOVEMOS AL BANCO 0 
-	MOVLW	4
-	MOVWF	NumeroIteracionesX
+
 ;------------------------------ PUERTO C --------------------------------------
-	MOVLW B'00000000'
-	MOVWF DATO_DISPLAY
+	;MOVLW B'11111111'
+	;MOVWF DATO_DISPLAY
+	MOVLW B'11111111'
+	MOVWF PORTC
 
-
-
-
-
-
+;--------------Configuracion de Mayores y menores
 
 ;PRUEBA para regresar el motor al mayor de luz  ELIMINAR
 	;MOVLW	1 ; Moviendo a w El numero de iteraciones que vaya
@@ -105,29 +106,50 @@ INICIO
 	;MOVLW	45; Moviendo a W el numero de pasos que vaya en Y
 	;MOVWF	IrMayorPasosY 
 
-	GOTO	MENU ;mueve el ip al punto de la etiqueta
+	GOTO	BTN_Inicio ;mueve el ip al punto de la etiqueta
 
 ;--------------------------MENU PROGRAMA-------------------------------
 MENU 
-	MOVLW	B'00000000'
-	MOVWF	PORTB
+	CAll	SeteoVariables
 	CALL	LOOP_GENERAL ; Mover Motores y buscar mayor luz 
+	
+	MOVF	IrMayorXIteracion,W
+	MOVWF	RegresarReiniciarX
+	MOVF	IrMayorPasosY,W
+	MOVWF	RegresarReiniciarY
+
 	CALL	IrMayorLuz ;Moverme a Buscar LUz
 	GOTO	LEER_E_BTN
 	;GOTO FotoResistencia ;Para Graduar Foto Resistencia 
 	GOTO	SALIR	
 
-
+SeteoVariables
+	MOVLW	16
+	MOVWF	NumeroIteracionesX
+	MOVLW	D'0'
+	MOVWF	Mayor_Encontrado
+	MOVLW	D'9'
+	MOVWF	Menor_Encontrado
+	MOVLW	B'00000000'
+	MOVWF	PORTB
+	MOVLW	D'0'
+	MOVWF	ContMotorX
+	MOVWF	IrMayorXIteracion
+	MOVWF	IrMayorPasosY
+	Return
 ;------------------------------ MOTORES INICIO --------------------------------------
 LOOP_GENERAL
-	MOVLW	128
+	MOVLW	32			;32*16 =512
 	MOVWF	PasosX
 	MOVWF	PasosRegresoX
 	CALL	MOVER_X
 	MOVLW	128
 	MOVWF	PasosY
-	MOVWF	PasosRegresoY 
+	MOVWF	PasosRegresoY
+	INCF	ContMotorX,1
 	CALL	CORRIDAY
+	MOVLW	0
+	MOVWF	ContMotorY
 	DECFSZ	NumeroIteracionesX, 1
 	GOTO	LOOP_GENERAL
 	MOVLW	4
@@ -195,6 +217,7 @@ REGRESOX
 	RETLW	B'00000000'
 
 CORRIDAY
+	INCF	ContMotorY,1
 	CALL	BuscarYMarcarFoto
    	MOVLW	B'11000000'
 	MOVWF	PORTB
@@ -237,7 +260,7 @@ FIN ; NO se utiliza esta etiqueta se comenta en linea 62
 
 
 IrMayorLuz
-	MOVLW	128
+	MOVLW	32
 	MOVWF	PasosX
 	CALL	FullMayorX
 	DECFSZ	IrMayorXIteracion , 1
@@ -283,27 +306,63 @@ FullMayorY
 	GOTO	FullMayorY
 	RETLW	B'00000000'
 
+ReiniciarTOTALX
+	MOVLW	32
+	MOVWF	PasosRegresoX
+	CALL	REGRESOX
+	DECFSZ	RegresarReiniciarX, 1
+	GOTO	ReiniciarTOTALX
+	;GOTO	FIN
+	RETLW	B'00000000'
+ReiniciarTOTALY
+    	MOVLW	B'10010000'
+	MOVWF	PORTB
+	CALL	DelayOneSecond
+	MOVLW	B'00110000'
+	MOVWF	PORTB
+	CALL	DelayOneSecond
+	MOVLW	B'01100000'
+	MOVWF	PORTB
+	CALL	DelayOneSecond
+	MOVLW	B'11000000'
+	MOVWF	PORTB
+	CALL	DelayOneSecond
+	DECFSZ	RegresarReiniciarY ,1
+	GOTO	ReiniciarTOTALY
+	RETLW	B'00000000'
 ;------------------------------ BOTON E 0 INICIAL -----------------------------------------
+BTN_Inicio
+	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
+	MOVWF DatoEnE ;Movemos la variable hacia dato en E
+	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
+	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
+	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+	goto	MENU
+	goto	BTN_Inicio
 LEER_E_BTN
 	MOVF PORTE, W ;Movemos lo de PUERTO E hacia W
 	MOVWF DatoEnE ;Movemos la variable hacia dato en E
 	MOVLW B'001' ; MOVEMOS A W EL 0 BIT de E  
 	SUBWF DatoEnE,W ;VA A RESTARLE AL DATO E LO QUE ESTA EN W
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
 	GOTO  CONTAR ; SI LA OPERACION ES 0 SE VA A UN CONTAR
+
+	MOVLW B'100'
+	SUBWF DatoEnE,w
+	BTFSC STATUS, Z ; VERIFICA QUE EL STATUS DE LA OPERACION SEA 0 
+	GOTO  EmpezarDeNuevo ; SI LA OPERACION ES 0 SE VA A UN CONTAR
+
+
 	GOTO  LEER_E_BTN ;REGRESA LOOP LEER
+
+EmpezarDeNuevo
+	CAll	ReiniciarTOTALY
+	Call	ReiniciarTOTALX
+	GOTO	BTN_Inicio	
 
 CONTAR
 	INCF  ContadorBTN, 0 ;incrementa e ContadorBTN en 1
@@ -336,202 +395,62 @@ BTN1
 	MOVLW D'0'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'1'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'2'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'3'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'4'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'5'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'6'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'7'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'8'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	MOVLW D'9'
 	MOVWF DATO_DISPLAY
 	CALL  COMP_DISPLAY
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond	
-	CALL	DelayOneSecond
-	CALL	DelayOneSecond
+	CALL	Llamada16Delays
+	CALL	Llamada16Delays
 
 	GOTO  LEER_E_BTN
 	;Mostrar el primer inciso
@@ -839,7 +758,7 @@ EntradaMenor
 	;MOVLW	B'00000010'
 	;MOVWF	PORTD
 	RETURN
-;--------------------------Compracion numeros-------
+;--------------------------Compracion numeros----------------------------------------------
 Comparacion_nums	
 	MOVF	ENTRADA_Comp,W
 	SUBWF	Menor_Encontrado,W	
@@ -857,11 +776,11 @@ EntradaMayor_nums
 	MOVF	ENTRADA_Comp,W
 	MOVWF	Mayor_Encontrado
 	;Moviendo la Iteracion X y Moviento en y
-	MOVF 	NumeroIteracionesX,W
+	MOVF 	ContMotorX,W
 	MOVWF	IrMayorXIteracion
-	INCF	IrMayorXIteracion,1
+	;INCF	IrMayorXIteracion,1
 
-	MOVF 	PasosY,W
+	MOVF 	ContMotorY,W
 	MOVWF	IrMayorPasosY
 
 	;MOVLW	B'00000001'
@@ -874,3 +793,25 @@ EntradaMenor_nums
 	;MOVLW	B'00000010'
 	;MOVWF	PORTD
 	RETURN
+
+;---------------------------------------Procedimientos Varios ---------------------------------
+Llamada16Delays
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond	
+	CALL	DelayOneSecond
+	CALL	DelayOneSecond
+	RETURN
+
+;--------------------------------------REINICIAR-------------------------------------------
